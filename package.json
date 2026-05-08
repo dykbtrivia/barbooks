@@ -4,6 +4,7 @@
   "scripts": {
     "dev:web": "cd apps/web && npm run dev",
     "dev:worker": "cd apps/worker && npx wrangler dev",
+    "dev:author": "cd apps/author && npm run dev",
     "build:web": "cd apps/web && npm run build",
     "deploy:worker": "cd apps/worker && npx wrangler deploy",
     "sync-pages": "cd apps/web && npm run sync-pages",
