@@ -36,14 +36,24 @@ if (hasBoth) {
 // relative to its width than 12-team, so it needs a bigger multiplier) so
 // each format's own natural height-bound scale factor also fills the full
 // content width — using the space without shrinking either format's text.
-const ROW   = 84;           // height per slot row
-const COL   = !hasBoth ? 130 : (is14 ? 186 : 119); // column width (blank line width)
-const CGAP  = !hasBoth ? 20  : (is14 ? 37  : 24);  // horizontal gap between columns (connector space)
-const VGAP  = 48;           // extra vertical gap between game pairs in same round
+// 14-team has one more Wild Card matchup pair than 12-team, so it's inherently
+// taller; ROW/VGAP are tightened for it specifically so its natural height
+// (and scale-down factor) stays closer to 12-team's rather than needing a much
+// harder shrink. COL/CGAP/SB_W (line lengths) are untouched by this.
+const ROW   = is14 ? 60 : 84; // height per slot row
+// Making the Divisional → Conf. Champ gap COL-long (see confBracket below)
+// widened the natural width a lot, enough that both formats became
+// width-bound with unused vertical space (worse for 14-team). Shrunk back
+// down, keeping the same COL:CGAP:SB_W ratios, so each format fills its full
+// width AND height budget again — which also brings their scale factors
+// (and therefore visual size) back close together.
+const COL   = !hasBoth ? 130 : (is14 ? 126 : 108); // column width (blank line width)
+const CGAP  = !hasBoth ? 20  : (is14 ? 25  : 22);  // horizontal gap between columns (connector space)
+const VGAP  = is14 ? 34 : 48; // extra vertical gap between game pairs in same round
 const SLOT_BOTTOM_PAD = 24; // trailing space below the last slot's text/underline
 const LW    = 1.5;
 const FONT  = 10.5;         // font size in pt
-const SB_W  = !hasBoth ? 70 : (is14 ? 130 : 83); // super bowl column width
+const SB_W  = !hasBoth ? 70 : (is14 ? 88 : 76); // super bowl column width
 const MAX_H = PRINT_CONTENT_AREA_HEIGHT_PX; // cap: printable content area height (6x9in page)
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -90,14 +100,12 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     parts.push(`<line x1="${sx}" y1="${oy + y + 2}" x2="${sx + w}" y2="${oy + y + 2}" stroke="#444" stroke-width="${LW}" />`);
   };
 
-  const addConnector = (x: number, y1: number, y2: number) => {
+  const addConnector = (x: number, y1: number, y2: number, gap: number = CGAP) => {
     const cx = fx(x);
-    const nextX = fx(x + (rtl ? -CGAP : 0));
-    const fromX = rtl ? cx : cx;
-    const toX = rtl ? cx - CGAP : cx + CGAP;
+    const toX = rtl ? cx - gap : cx + gap;
     const midY = oy + (y1 + y2) / 2 + 2;
-    parts.push(`<line x1="${fromX}" y1="${oy + y1 + 2}" x2="${fromX}" y2="${oy + y2 + 2}" stroke="#333" stroke-width="${LW}" />`);
-    parts.push(`<line x1="${fromX}" y1="${midY}" x2="${toX}" y2="${midY}" stroke="#333" stroke-width="${LW}" />`);
+    parts.push(`<line x1="${cx}" y1="${oy + y1 + 2}" x2="${cx}" y2="${oy + y2 + 2}" stroke="#333" stroke-width="${LW}" />`);
+    parts.push(`<line x1="${cx}" y1="${midY}" x2="${toX}" y2="${midY}" stroke="#333" stroke-width="${LW}" />`);
   };
 
   const t = (i: number) => seeds[i] || '';
@@ -131,21 +139,20 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     addSlot(divX, div1y1, COL, t(0), 1); addSlot(divX, div1y2, COL, '');
     addSlot(divX, div2y1, COL, ''); addSlot(divX, div2y2, COL, '');
 
-    addConnector(divX + COL, div1y1, div1y2);
-    addConnector(divX + COL, div2y1, div2y2);
+    addConnector(divX + COL, div1y1, div1y2, COL);
+    addConnector(divX + COL, div2y1, div2y2, COL);
 
-    // DIV winners combine → CC
+    // DIV winners combine → CC. The merge lands exactly where the two arms
+    // above end (COL-long, matching the box width), so it's a legit write-in
+    // line for the Divisional round's winner, not just a short connector gap.
     const div1Mid = (div1y1 + div1y2) / 2;
     const div2Mid = (div2y1 + div2y2) / 2;
-    const divCombX = divX + COL + CGAP;
+    const divCombX = divX + COL + COL;
     const fdcx = fx(divCombX);
-    const fdce = rtl ? fdcx - CGAP : fdcx + CGAP;
-    const divCombMidY = oy + (div1Mid + div2Mid) / 2 + 2;
     parts.push(`<line x1="${fdcx}" y1="${oy + div1Mid + 2}" x2="${fdcx}" y2="${oy + div2Mid + 2}" stroke="#333" stroke-width="${LW}" />`);
-    parts.push(`<line x1="${fdcx}" y1="${divCombMidY}" x2="${fdce}" y2="${divCombMidY}" stroke="#333" stroke-width="${LW}" />`);
 
     // CC slot
-    const ccX = divX + COL + CGAP * 2;
+    const ccX = divX + COL + COL;
     const ccY = (div1Mid + div2Mid) / 2;
     addSlot(ccX, ccY, COL, '');
 
@@ -178,21 +185,20 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     addSlot(divX, div1y1, COL, t(0), 1); addSlot(divX, div1y2, COL, '');
     addSlot(divX, div2y1, COL, t(1), 2); addSlot(divX, div2y2, COL, '');
 
-    addConnector(divX + COL, div1y1, div1y2);
-    addConnector(divX + COL, div2y1, div2y2);
+    addConnector(divX + COL, div1y1, div1y2, COL);
+    addConnector(divX + COL, div2y1, div2y2, COL);
 
-    // DIV winners combine → CC
+    // DIV winners combine → CC. The merge lands exactly where the two arms
+    // above end (COL-long, matching the box width), so it's a legit write-in
+    // line for the Divisional round's winner, not just a short connector gap.
     const div1Mid = (div1y1 + div1y2) / 2;
     const div2Mid = (div2y1 + div2y2) / 2;
-    const divCombX = divX + COL + CGAP;
+    const divCombX = divX + COL + COL;
     const fdcx = fx(divCombX);
-    const fdce = rtl ? fdcx - CGAP : fdcx + CGAP;
-    const divCombMidY = oy + (div1Mid + div2Mid) / 2 + 2;
     parts.push(`<line x1="${fdcx}" y1="${oy + div1Mid + 2}" x2="${fdcx}" y2="${oy + div2Mid + 2}" stroke="#333" stroke-width="${LW}" />`);
-    parts.push(`<line x1="${fdcx}" y1="${divCombMidY}" x2="${fdce}" y2="${divCombMidY}" stroke="#333" stroke-width="${LW}" />`);
 
     // CC slot
-    const ccX = divX + COL + CGAP * 2;
+    const ccX = divX + COL + COL;
     const ccY = (div1Mid + div2Mid) / 2;
     addSlot(ccX, ccY, COL, '');
 
@@ -209,15 +215,21 @@ function roundHeaders(ox: number, oy: number, rtl: boolean, mirrorW: number, con
   const parts: string[] = [];
 
   const wcMid = COL / 2;
-  const divX = is14 ? COL + CGAP * 2 : COL + CGAP;
+  const divX = COL + CGAP;
   const divMid = divX + COL / 2;
-  const ccX = is14 ? divX + COL + CGAP * 2 : divX + COL + CGAP * 2;
+  // The Divisional → CC gap is now COL-long — a real write-in line for the
+  // Divisional round's winner — so it's the Conf. Champ "column". The box
+  // that follows it (formerly labeled Conf. Champ) is who represents this
+  // conference in the Super Bowl.
+  const champMid = divX + COL + COL / 2;
+  const ccX = divX + COL + COL;
   const ccMid = ccX + COL / 2;
 
   const champLabel = conf ? `${conf} Championship` : 'Conf. Champ';
   parts.push(`<text x="${fx(wcMid)}" y="${oy}" text-anchor="middle" style="${style}">Wild Card</text>`);
   parts.push(`<text x="${fx(divMid)}" y="${oy}" text-anchor="middle" style="${style}">Divisional</text>`);
-  parts.push(`<text x="${fx(ccMid)}" y="${oy}" text-anchor="middle" style="${style}">${champLabel}</text>`);
+  parts.push(`<text x="${fx(champMid)}" y="${oy}" text-anchor="middle" style="${style}">${champLabel}</text>`);
+  parts.push(`<text x="${fx(ccMid)}" y="${oy}" text-anchor="middle" style="${style}">Super Bowl</text>`);
   return parts.join('\n');
 }
 
@@ -261,13 +273,15 @@ if (hasBoth) {
   // the AFC and NFC Championship outputs
   const sbX = confW;
   const sbCY = (afcResult.ccY + nfcResult.ccY) / 2;
-  const sbLabelStyle = "font-size:15pt;font-family:'Bebas Neue',sans-serif;text-transform:uppercase;letter-spacing:0.06em;fill:#111;";
-  parts.push(`<text x="${sbX + SB_W / 2}" y="${sbCY - 16}" text-anchor="middle" style="${sbLabelStyle}">Super Bowl</text>`);
   parts.push(`<line x1="${sbX + 10}" y1="${sbCY + 2}" x2="${sbX + SB_W - 10}" y2="${sbCY + 2}" stroke="#444" stroke-width="${LW}" />`);
 
-  // Connect each Conference Championship output to the Super Bowl cell
+  // Connect each Conference Championship output to the Super Bowl cell —
+  // vertical run down to the Super Bowl's row, then a short horizontal stub
+  // bridging into its blank line (which starts 10px right of ccEdgeX/sbX).
   parts.push(`<line x1="${afcResult.ccEdgeX}" y1="${afcResult.ccY + 2}" x2="${afcResult.ccEdgeX}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
+  parts.push(`<line x1="${afcResult.ccEdgeX}" y1="${sbCY + 2}" x2="${sbX + 10}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
   parts.push(`<line x1="${nfcResult.ccEdgeX}" y1="${nfcResult.ccY + 2}" x2="${nfcResult.ccEdgeX}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
+  parts.push(`<line x1="${nfcResult.ccEdgeX}" y1="${sbCY + 2}" x2="${sbX + 10}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
 
   svgContent = parts.join('\n');
 } else {
