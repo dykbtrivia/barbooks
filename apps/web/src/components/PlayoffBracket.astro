@@ -7,6 +7,8 @@
  *   "2020+:     AFC1, ..., AFC7 / NFC1, ..., NFC7"
  */
 
+import { PRINT_CONTENT_AREA_HEIGHT_PX } from '../utils/printLayout.js';
+
 interface Props { clueStyle: string; }
 const { clueStyle } = Astro.props;
 
@@ -28,13 +30,21 @@ if (hasBoth) {
 }
 
 // ── Layout constants ───────────────────────────────────────────────────────────
+// The whole bracket is scaled down to fit MAX_H (it's always taller than that
+// naturally), so the browser's aspect-ratio scaling determines the final
+// rendered width too. COL/CGAP/SB_W are sized per format (14-team is taller
+// relative to its width than 12-team, so it needs a bigger multiplier) so
+// each format's own natural height-bound scale factor also fills the full
+// content width — using the space without shrinking either format's text.
 const ROW   = 84;           // height per slot row
-const COL   = hasBoth ? 100 : 130; // column width (blank line width)
-const CGAP  = 20;           // horizontal gap between columns (connector space)
+const COL   = !hasBoth ? 130 : (is14 ? 186 : 119); // column width (blank line width)
+const CGAP  = !hasBoth ? 20  : (is14 ? 37  : 24);  // horizontal gap between columns (connector space)
 const VGAP  = 48;           // extra vertical gap between game pairs in same round
+const SLOT_BOTTOM_PAD = 24; // trailing space below the last slot's text/underline
 const LW    = 1.5;
-const FONT  = 9;            // font size in pt
-const SB_W  = 70;           // super bowl column width
+const FONT  = 10.5;         // font size in pt
+const SB_W  = !hasBoth ? 70 : (is14 ? 130 : 83); // super bowl column width
+const MAX_H = PRINT_CONTENT_AREA_HEIGHT_PX; // cap: printable content area height (6x9in page)
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 // A "slot" is one team entry: label text + blank line underneath
@@ -61,7 +71,7 @@ function connector(rightX: number, y1: number, y2: number): string {
 // ── Build one conference bracket ───────────────────────────────────────────────
 // Returns SVG string + total dimensions. seeds[0]=seed1, seeds[1]=seed2, etc.
 // rtl=true mirrors x coordinates (for NFC facing Super Bowl)
-function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirrorW: number): { svg: string; w: number; h: number } {
+function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirrorW: number): { svg: string; w: number; h: number; ccY: number; ccEdgeX: number } {
   const fx = (x: number) => rtl ? ox + mirrorW - x : ox + x;
   const fxRange = (x: number, w: number) => rtl ? fx(x + w) : fx(x);
   const parts: string[] = [];
@@ -73,9 +83,9 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     if (seed) {
       const seedText = `#${seed}`;
       const seedLabel = label ? `${seedText}  ${label}` : seedText;
-      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" fill="#222" dominant-baseline="auto" text-anchor="${anchor}"><tspan font-weight="700" font-size="7pt" fill="#666">${seedText}</tspan>  ${label}</text>`);
+      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" font-family="'IBM Plex Mono', monospace" fill="#222" dominant-baseline="auto" text-anchor="${anchor}"><tspan font-weight="700" font-size="13pt" fill="#111">${seedText}</tspan>  ${label}</text>`);
     } else if (label) {
-      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" fill="#222" dominant-baseline="auto" text-anchor="${anchor}">${label}</text>`);
+      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" font-family="'IBM Plex Mono', monospace" fill="#222" dominant-baseline="auto" text-anchor="${anchor}">${label}</text>`);
     }
     parts.push(`<line x1="${sx}" y1="${oy + y + 2}" x2="${sx + w}" y2="${oy + y + 2}" stroke="#444" stroke-width="${LW}" />`);
   };
@@ -140,8 +150,8 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     addSlot(ccX, ccY, COL, '');
 
     const totalW = ccX + COL;
-    const totalH = wc3y2 + ROW;
-    return { svg: parts.join('\n'), w: totalW, h: totalH };
+    const totalH = wc3y2 + SLOT_BOTTOM_PAD;
+    return { svg: parts.join('\n'), w: totalW, h: totalH, ccY: oy + ccY, ccEdgeX: fx(ccX + COL) };
 
   } else {
     // ── 12-team (1990-2019) ──
@@ -187,15 +197,15 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     addSlot(ccX, ccY, COL, '');
 
     const totalW = ccX + COL;
-    const totalH = wc2y2 + ROW;
-    return { svg: parts.join('\n'), w: totalW, h: totalH };
+    const totalH = wc2y2 + SLOT_BOTTOM_PAD;
+    return { svg: parts.join('\n'), w: totalW, h: totalH, ccY: oy + ccY, ccEdgeX: fx(ccX + COL) };
   }
 }
 
 // ── Round headers ──────────────────────────────────────────────────────────────
 function roundHeaders(ox: number, oy: number, rtl: boolean, mirrorW: number, confW: number, conf?: 'AFC' | 'NFC'): string {
   const fx = (x: number) => rtl ? ox + mirrorW - x : ox + x;
-  const style = 'font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;fill:#555;';
+  const style = "font-size:8pt;font-family:'IBM Plex Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;fill:#555;";
   const parts: string[] = [];
 
   const wcMid = COL / 2;
@@ -213,7 +223,7 @@ function roundHeaders(ox: number, oy: number, rtl: boolean, mirrorW: number, con
 
 // ── Compose final SVG ──────────────────────────────────────────────────────────
 const HEADER_H = 20;
-const CONF_LABEL_H = 16;
+const CONF_LABEL_H = 28;
 const HEADER_GAP = 24;
 const TOP_PAD = hasBoth ? HEADER_H + CONF_LABEL_H + HEADER_GAP : HEADER_H + HEADER_GAP;
 
@@ -222,33 +232,42 @@ let svgHeight: number;
 let svgContent: string;
 
 if (hasBoth) {
+  // AFC stacked directly on top of NFC — both share the same (non-mirrored)
+  // column positions. The Super Bowl sits in its own column to the right,
+  // vertically centered between the two Conference Championship outputs.
   const afcResult = confBracket(afcSeeds, 0, TOP_PAD, false, 0);
   const confW = afcResult.w;
-  const totalW = confW * 2 + SB_W;
-  const nfcOX = confW + SB_W;
 
-  const nfcResult = confBracket(nfcSeeds, nfcOX, TOP_PAD, true, confW);
+  const afcBottom = TOP_PAD + afcResult.h;
+  const nfcSectionTop = afcBottom;
+  const nfcOY = nfcSectionTop + TOP_PAD;
 
-  svgWidth = totalW;
-  svgHeight = Math.max(afcResult.h, nfcResult.h) + TOP_PAD;
+  const nfcResult = confBracket(nfcSeeds, 0, nfcOY, false, 0);
+
+  svgWidth = confW + SB_W;
+  svgHeight = nfcOY + nfcResult.h;
 
   const parts: string[] = [];
-  const confStyle = 'font-size:8pt;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;fill:#555;';
+  const confStyle = "font-size:18pt;font-family:'Bebas Neue',sans-serif;letter-spacing:0.08em;text-transform:uppercase;fill:#111;";
   parts.push(`<text x="${confW / 2}" y="${CONF_LABEL_H - 4}" text-anchor="middle" style="${confStyle}">AFC</text>`);
-  parts.push(`<text x="${nfcOX + confW / 2}" y="${CONF_LABEL_H - 4}" text-anchor="middle" style="${confStyle}">NFC</text>`);
+  parts.push(`<text x="${confW / 2}" y="${nfcSectionTop + CONF_LABEL_H - 4}" text-anchor="middle" style="${confStyle}">NFC</text>`);
 
-  parts.push(roundHeaders(0, CONF_LABEL_H + HEADER_H - 6, false, 0, confW, 'AFC'));
-  parts.push(roundHeaders(nfcOX, CONF_LABEL_H + HEADER_H - 6, true, confW, confW, 'NFC'));
+  parts.push(roundHeaders(0, CONF_LABEL_H + HEADER_H - 6, false, 0, confW));
 
   parts.push(afcResult.svg);
   parts.push(nfcResult.svg);
 
-  // Super Bowl
+  // Super Bowl — its own column to the right, vertically centered between
+  // the AFC and NFC Championship outputs
   const sbX = confW;
-  const sbCY = TOP_PAD + Math.max(afcResult.h, nfcResult.h) / 2;
-  const sbLabelStyle = 'font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;fill:#555;';
-  parts.push(`<text x="${sbX + SB_W / 2}" y="${sbCY - 10}" text-anchor="middle" style="${sbLabelStyle}">Super Bowl</text>`);
+  const sbCY = (afcResult.ccY + nfcResult.ccY) / 2;
+  const sbLabelStyle = "font-size:15pt;font-family:'Bebas Neue',sans-serif;text-transform:uppercase;letter-spacing:0.06em;fill:#111;";
+  parts.push(`<text x="${sbX + SB_W / 2}" y="${sbCY - 16}" text-anchor="middle" style="${sbLabelStyle}">Super Bowl</text>`);
   parts.push(`<line x1="${sbX + 10}" y1="${sbCY + 2}" x2="${sbX + SB_W - 10}" y2="${sbCY + 2}" stroke="#444" stroke-width="${LW}" />`);
+
+  // Connect each Conference Championship output to the Super Bowl cell
+  parts.push(`<line x1="${afcResult.ccEdgeX}" y1="${afcResult.ccY + 2}" x2="${afcResult.ccEdgeX}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
+  parts.push(`<line x1="${nfcResult.ccEdgeX}" y1="${nfcResult.ccY + 2}" x2="${nfcResult.ccEdgeX}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
 
   svgContent = parts.join('\n');
 } else {
@@ -263,10 +282,27 @@ if (hasBoth) {
 }
 ---
 
-<svg
-  viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-  width="100%"
-  style={`max-width:${svgWidth}px`}
-  xmlns="http://www.w3.org/2000/svg"
-  set:html={svgContent}
-/>
+<div class="bracket-wrap">
+  <svg
+    viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+    width={svgWidth}
+    height={svgHeight}
+    style={`width:auto; height:auto; max-width:100%; max-height:${MAX_H}px;`}
+    xmlns="http://www.w3.org/2000/svg"
+    set:html={svgContent}
+  />
+</div>
+
+<style define:vars={{ maxH: `${MAX_H}px` }}>
+  .bracket-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  @media print {
+    .bracket-wrap {
+      min-height: var(--maxH);
+      align-items: center;
+    }
+  }
+</style>
