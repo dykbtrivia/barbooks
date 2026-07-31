@@ -52,9 +52,26 @@ const CGAP  = !hasBoth ? 20  : (is14 ? 25  : 22);  // horizontal gap between col
 const VGAP  = is14 ? 34 : 48; // extra vertical gap between game pairs in same round
 const SLOT_BOTTOM_PAD = 24; // trailing space below the last slot's text/underline
 const LW    = 1.5;
-const FONT  = 10.5;         // font size in pt
 const SB_W  = !hasBoth ? 70 : (is14 ? 88 : 76); // super bowl column width
 const MAX_H = PRINT_CONTENT_AREA_HEIGHT_PX; // cap: printable content area height (6x9in page)
+
+const HEADER_H = 20;
+const CONF_LABEL_H = 28;
+const HEADER_GAP = 24;
+const TOP_PAD = hasBoth ? HEADER_H + CONF_LABEL_H + HEADER_GAP : HEADER_H + HEADER_GAP;
+
+// TEXT_SCALE counteracts the format-size gap: 14-team's natural (pre-scale)
+// height is taller than 12-team's, so its browser scale-down factor is more
+// aggressive. Boosting every font size by the same ratio its natural height
+// exceeds 12-team's (its reference) makes the FINAL rendered text size equal
+// across both formats, not just "closer."
+const perConfHeight = (rowVal: number, vgapVal: number, fourteen: boolean) =>
+  (fourteen ? rowVal * 5 + vgapVal * 2 : rowVal * 3 + vgapVal) + SLOT_BOTTOM_PAD;
+const NATURAL_H_REF  = 2 * TOP_PAD + 2 * perConfHeight(84, 48, false); // 12-team's own natural height
+const NATURAL_H_THIS = 2 * TOP_PAD + 2 * perConfHeight(ROW, VGAP, is14);
+const TEXT_SCALE = !hasBoth ? 1 : NATURAL_H_THIS / NATURAL_H_REF;
+
+const FONT = 10.5 * TEXT_SCALE; // font size in pt
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 // A "slot" is one team entry: label text + blank line underneath
@@ -93,7 +110,7 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     if (seed) {
       const seedText = `#${seed}`;
       const seedLabel = label ? `${seedText}  ${label}` : seedText;
-      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" font-family="'IBM Plex Mono', monospace" fill="#222" dominant-baseline="auto" text-anchor="${anchor}"><tspan font-weight="700" font-size="13pt" fill="#111">${seedText}</tspan>  ${label}</text>`);
+      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" font-family="'IBM Plex Mono', monospace" fill="#222" dominant-baseline="auto" text-anchor="${anchor}"><tspan font-weight="700" font-size="${13 * TEXT_SCALE}pt" fill="#111">${seedText}</tspan>  ${label}</text>`);
     } else if (label) {
       parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" font-family="'IBM Plex Mono', monospace" fill="#222" dominant-baseline="auto" text-anchor="${anchor}">${label}</text>`);
     }
@@ -211,7 +228,7 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
 // ── Round headers ──────────────────────────────────────────────────────────────
 function roundHeaders(ox: number, oy: number, rtl: boolean, mirrorW: number, confW: number, conf?: 'AFC' | 'NFC'): string {
   const fx = (x: number) => rtl ? ox + mirrorW - x : ox + x;
-  const style = "font-size:8pt;font-family:'IBM Plex Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;fill:#555;";
+  const style = `font-size:${8 * TEXT_SCALE}pt;font-family:'IBM Plex Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;fill:#555;`;
   const parts: string[] = [];
 
   const wcMid = COL / 2;
@@ -234,11 +251,6 @@ function roundHeaders(ox: number, oy: number, rtl: boolean, mirrorW: number, con
 }
 
 // ── Compose final SVG ──────────────────────────────────────────────────────────
-const HEADER_H = 20;
-const CONF_LABEL_H = 28;
-const HEADER_GAP = 24;
-const TOP_PAD = hasBoth ? HEADER_H + CONF_LABEL_H + HEADER_GAP : HEADER_H + HEADER_GAP;
-
 let svgWidth: number;
 let svgHeight: number;
 let svgContent: string;
@@ -260,7 +272,7 @@ if (hasBoth) {
   svgHeight = nfcOY + nfcResult.h;
 
   const parts: string[] = [];
-  const confStyle = "font-size:18pt;font-family:'Bebas Neue',sans-serif;letter-spacing:0.08em;text-transform:uppercase;fill:#111;";
+  const confStyle = `font-size:${18 * TEXT_SCALE}pt;font-family:'Bebas Neue',sans-serif;letter-spacing:0.08em;text-transform:uppercase;fill:#111;`;
   parts.push(`<text x="${confW / 2}" y="${CONF_LABEL_H - 4}" text-anchor="middle" style="${confStyle}">AFC</text>`);
   parts.push(`<text x="${confW / 2}" y="${nfcSectionTop + CONF_LABEL_H - 4}" text-anchor="middle" style="${confStyle}">NFC</text>`);
 
