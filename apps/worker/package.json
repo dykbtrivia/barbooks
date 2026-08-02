@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
+    "seed-kv-push": "wrangler kv bulk put --namespace-id 8d9e8560388f4140a6819922931f5a48 kv-seed.json",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {

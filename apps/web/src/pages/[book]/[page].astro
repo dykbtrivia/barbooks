@@ -30,11 +30,11 @@ const bookConfig = booksConfig[bookId];
 
 // If the book doesn't exist, redirect to NFL book page 1
 if (!bookConfig) {
-  return Astro.redirect('/barbooks/nfl/1/');
+  return Astro.redirect('/nfl/1/');
 }
 
 if (!bookConfig.pageExists(pageNumber)) {
-  return Astro.redirect(`/barbooks/${bookId}/1/`);
+  return Astro.redirect(`/${bookId}/1/`);
 }
 
 const pageConfiguration: PageConfiguration = bookConfig.getPageConfiguration(pageNumber);

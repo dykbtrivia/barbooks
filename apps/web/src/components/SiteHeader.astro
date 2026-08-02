@@ -30,11 +30,11 @@ const uniqueDifficulties = [...new Set(pages.map(p => p.difficulty).filter(Boole
       <!-- Sport toggle -->
       <div class="flex rounded overflow-hidden border border-white/40 text-sm font-semibold shrink-0">
         <a
-          href="/barbooks/nfl/1/"
+          href="/nfl/1/"
           class={`px-3 py-1.5 transition-colors ${bookId === 'nfl' ? 'bg-white text-blue-600' : 'hover:bg-white/10'}`}
         >NFL</a>
         <a
-          href="/barbooks/nba/1/"
+          href="/nba/1/"
           class={`px-3 py-1.5 transition-colors border-l border-white/40 ${bookId === 'nba' ? 'bg-white text-blue-600' : 'hover:bg-white/10'}`}
         >NBA</a>
       </div>
@@ -129,7 +129,7 @@ const uniqueDifficulties = [...new Set(pages.map(p => p.difficulty).filter(Boole
   function navigateTo(pageNum) {
     const params = getFilterParams();
     const qs = params.toString();
-    window.location.href = `/barbooks/${bookId}/${pageNum}/` + (qs ? `?${qs}` : '');
+    window.location.href = `/${bookId}/${pageNum}/` + (qs ? `?${qs}` : '');
   }
 
   function restoreFilters() {

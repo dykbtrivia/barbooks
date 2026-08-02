@@ -713,10 +713,54 @@
   },
   {
     "key": "nfl:179",
-    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2010/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+    "value": "{\"url\":\"https://en.wikipedia.org/wiki/2010%E2%80%9311_NFL_playoffs#Bracket\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
   },
   {
     "key": "nfl:180",
-    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2024/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+    "value": "{\"url\":\"https://en.wikipedia.org/wiki/2024%E2%80%9325_NFL_playoffs#Bracket\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:181",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2012/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:182",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2007/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:183",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2005/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:184",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2000/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:185",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/1991/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:186",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/1998/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:187",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2002/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:188",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2009/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:189",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2021/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:190",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2025/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
+  },
+  {
+    "key": "nfl:191",
+    "value": "{\"url\":\"https://www.pro-football-reference.com/years/2018/playoffs.htm\",\"label\":\"Guess the Season — Playoff Bracket\",\"category\":\"Playoffs\"}"
   }
 ]
