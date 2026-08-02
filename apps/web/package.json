@@ -10,6 +10,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "sync-pages": "npx tsx src/utils/excelToJson.ts",
+    "seed-kv": "npx tsx scripts/seed-kv.ts",
     "generate-pdf": "npx tsx scripts/generate-pdf.ts"
   },
   "dependencies": {

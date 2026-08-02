@@ -28,7 +28,7 @@ const outFlag = outFlagIdx !== -1 ? args[outFlagIdx + 1] : null;
 // Path to the pre-installed Playwright Chromium (avoids re-download)
 const CHROMIUM_PATH = '/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome';
 const PREVIEW_PORT = 4322;
-const BASE_URL = `http://localhost:${PREVIEW_PORT}/barbooks`;
+const BASE_URL = `http://localhost:${PREVIEW_PORT}`;
 const TMP_DIR = join(process.cwd(), '.pdf-tmp');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

@@ -20,13 +20,13 @@ class BookApp {
   private bookId: string;
 
   constructor() {
-    // Parse current page from URL: /barbooks/nfl/3/ -> 3
+    // Parse current page from URL: /nfl/3/ -> 3
     const pathParts = window.location.pathname.split('/').filter(part => part !== '');
     const pageParam = pathParts[pathParts.length - 1];
     this.currentPage = window.bookAppConfig?.currentPage || parseInt(pageParam) || 1;
     this.totalPages = window.bookAppConfig?.totalPages ?? 0;
     this.answerKeyUrl = window.bookAppConfig?.answerKeyUrl || `https://example.com/page-${this.currentPage}-answers`;
-    this.bookId = window.bookAppConfig?.bookId || (pathParts.length > 2 ? pathParts[1] : 'nfl');
+    this.bookId = window.bookAppConfig?.bookId || (pathParts.length > 1 ? pathParts[0] : 'nfl');
     this.init();
   }
 
@@ -44,7 +44,7 @@ class BookApp {
       goBtn.addEventListener('click', () => {
         const pageNum = parseInt(pageInput.value);
         if (pageNum && pageNum >= 1 && pageNum <= this.totalPages) {
-          window.location.href = `/barbooks/${this.bookId}/${pageNum}/`;
+          window.location.href = `/${this.bookId}/${pageNum}/`;
           pageInput.value = '';
         }
       });
@@ -67,7 +67,7 @@ class BookApp {
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
         if (this.currentPage > 1) {
-          window.location.href = `/barbooks/${this.bookId}/${this.currentPage - 1}/`;
+          window.location.href = `/${this.bookId}/${this.currentPage - 1}/`;
         }
       });
     }
@@ -75,7 +75,7 @@ class BookApp {
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
         if (this.currentPage < this.totalPages) {
-          window.location.href = `/barbooks/${this.bookId}/${this.currentPage + 1}/`;
+          window.location.href = `/${this.bookId}/${this.currentPage + 1}/`;
         }
       });
     }
