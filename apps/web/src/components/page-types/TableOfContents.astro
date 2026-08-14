@@ -1,0 +1,145 @@
+---
+import type { TocCategoryEntry } from '../../utils/tocBuilder.js';
+
+interface Props {
+  entries: TocCategoryEntry[];
+  bookId: string;
+  title?: string;
+  edition?: string;
+}
+
+const { entries, bookId, title = 'Table of Contents', edition } = Astro.props as Props;
+const editionLabel = edition ?? `${bookId.toUpperCase()} · Vol. I`;
+---
+
+<div class="toc-page">
+  <div class="toc-stripe">
+    <span>Do You Know Ball?</span>
+    <span>{editionLabel}</span>
+  </div>
+
+  <div class="toc-title-block">
+    <h1>{title}</h1>
+  </div>
+
+  <p class="toc-note">Questions within each section are ordered easy → hard.</p>
+
+  <div class="toc-body">
+    {entries.map(entry => (
+      <a class="toc-row" href={`/${bookId}/${entry.startingPage}/`}>
+        <span class="toc-name">{entry.name}</span>
+        <span class="toc-leader"></span>
+        <span class="toc-page-num">{entry.startingPage}</span>
+      </a>
+    ))}
+  </div>
+
+  <div class="toc-stripe toc-stripe-bottom">
+    <span>dykbtrivia.com</span>
+  </div>
+</div>
+
+<style>
+  .toc-page {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    min-height: 80vh;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  @media print {
+    .toc-page {
+      /* Cancel out body's 0.5in/0.75in print padding (global.css) so the
+         stripes bleed to the physical page edge — same technique as
+         PageHeaderScorecard/PageFooter's negative margins. */
+      margin-left: -0.75in;
+      margin-right: -0.75in;
+      margin-top: -0.5in;
+      margin-bottom: -0.5in;
+      height: 9in;
+      min-height: 9in;
+    }
+  }
+
+  .toc-stripe {
+    background: #111;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0.75in;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .toc-stripe-bottom {
+    justify-content: center;
+    margin-top: auto;
+  }
+
+  .toc-title-block {
+    padding: 24px 0.75in 12px;
+    border-bottom: 2px solid #111;
+  }
+
+  .toc-title-block h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 0.05em;
+    color: #111;
+    margin: 0;
+  }
+
+  .toc-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-style: italic;
+    font-size: 11px;
+    color: #999;
+    padding: 12px 0.75in 0;
+    margin: 0;
+  }
+
+  .toc-body {
+    padding: 16px 0.75in 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .toc-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .toc-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #111;
+    white-space: nowrap;
+  }
+
+  .toc-leader {
+    flex: 1;
+    border-bottom: 1.5px solid #111;
+    margin-bottom: 4px;
+  }
+
+  .toc-page-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #111;
+    font-size: 14px;
+  }
+</style>

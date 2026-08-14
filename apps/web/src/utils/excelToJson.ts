@@ -13,9 +13,43 @@ import XLSX from 'xlsx';
 
 const OUT_PATH = path.join('src', 'utils', 'pageConfig.ts');
 
+// Each book's Pages sheet can have its own column layout — NFL has
+// category/subcategory/difficulty columns that NBA doesn't have yet.
+const NFL_PAGES_HEADER = [
+  'pageNum', 'type', 'title', 'description', 'category', 'subcategory', 'difficulty',
+  'itemsNote', 'columns', 'answerKeyUrl', 'actionNote', 'notePosition',
+  'noteRotation', 'noteIcon',
+];
+
+const NBA_PAGES_HEADER = [
+  'pageNum', 'type', 'title', 'description',
+  'itemsNote', 'columns', 'answerKeyUrl', 'actionNote', 'notePosition',
+  'noteRotation', 'noteIcon',
+];
+
 const BOOKS = [
-  { id: 'nfl', file: 'NFL Barbook Trivia.xlsx' },
-  { id: 'nba', file: 'NBA Barbook Trivia.xlsx' }
+  { id: 'nfl', file: 'NFL Barbook Trivia.xlsx', pagesHeader: NFL_PAGES_HEADER },
+  { id: 'nba', file: 'NBA Barbook Trivia.xlsx', pagesHeader: NBA_PAGES_HEADER }
+];
+
+// Controls the order categories/subcategories are sorted into during sync —
+// edit these lists to change how the book (and its TOC) is organized.
+// Anything not listed here falls back to alphabetical, placed after every
+// name that IS listed.
+const CATEGORY_ORDER: string[] = [
+  'All-Time',
+  'Awards',
+  'Contracts',
+  'Fantasy',
+  'Other',
+  'Playoffs',
+  'Recent',
+  'Single-Season',
+];
+
+const SUBCATEGORY_ORDER: string[] = [
+  'Bracket',
+  'Matchups',
 ];
 
 // ── Types mirroring the existing PageConfiguration union ─────────────────────
@@ -33,6 +67,7 @@ interface ListPage {
   title:         string;
   description:   string;
   category?:     string;
+  subcategory?:  string;
   difficulty?:   PageDifficulty;
   items:         { clue: string | number }[];
   columns:       number;
@@ -50,6 +85,7 @@ interface MatchupPage {
   title:         string;
   description:   string;
   category?:     string;
+  subcategory?:  string;
   difficulty?:   PageDifficulty;
   items:         MatchupItem[];
   columns:       number;
@@ -63,11 +99,18 @@ interface TextPage {
   answerKeyUrl:  string;
 }
 
+interface TocPage {
+  type:          'toc';
+  title:         string;
+  answerKeyUrl:  string;
+}
+
 interface TeamsPage {
   type:          'teams';
   title:         string;
   description:   string;
   category?:     string;
+  subcategory?:  string;
   difficulty?:   PageDifficulty;
   answerKeyUrl:  string;
   actionContent?: ActionContent;
@@ -78,6 +121,7 @@ interface BracketPage {
   title:         string;
   description:   string;
   category?:     string;
+  subcategory?:  string;
   difficulty?:   PageDifficulty;
   /** Raw column G value passed straight through to the component */
   clueStyle:     string;
@@ -85,7 +129,7 @@ interface BracketPage {
   actionContent?: ActionContent;
 }
 
-type PageConfig = ListPage | MatchupPage | TextPage | TeamsPage | BracketPage;
+type PageConfig = ListPage | MatchupPage | TextPage | TeamsPage | BracketPage | TocPage;
 
 // ── Helper: parse the "itemsNote" column into an items array ──────────────────
 function parseItemsNote(note: string): { clue: string | number }[] {
@@ -110,7 +154,84 @@ function parseItemsNote(note: string): { clue: string | number }[] {
   return Array.from({ length: count }, () => ({ clue: '' }));
 }
 
-function processBook(bookId: string, excelPath: string) {
+const CONTENT_TYPES = new Set(['list', 'matchup', 'teams', 'bracket']);
+
+// Reorders parsed pages so the book's physical layout matches what the TOC
+// promises: grouped by category, then subcategory within it, per
+// CATEGORY_ORDER/SUBCATEGORY_ORDER above (alphabetical fallback for anything
+// not listed there). `toc` pages are pinned to the front. `text`/`custom`
+// pages aren't sorted independently — each stays glued to its nearest
+// neighboring content page (preceding if one exists, otherwise the next one)
+// and travels with it.
+function reorderPages(pages: PageConfig[]): PageConfig[] {
+  const tocPages = pages.filter(p => p.type === 'toc');
+  const rest = pages.filter(p => p.type !== 'toc');
+
+  interface Group { anchor: PageConfig; leaders: PageConfig[]; trailers: PageConfig[]; originalIndex: number; }
+  const groups: Group[] = [];
+  let currentGroup: Group | null = null;
+  const pendingLeaders: PageConfig[] = [];
+
+  rest.forEach((page, idx) => {
+    if (CONTENT_TYPES.has(page.type)) {
+      currentGroup = { anchor: page, leaders: [...pendingLeaders], trailers: [], originalIndex: idx };
+      pendingLeaders.length = 0;
+      groups.push(currentGroup);
+    } else if (currentGroup) {
+      currentGroup.trailers.push(page);
+    } else {
+      pendingLeaders.push(page); // text/custom before any content page seen yet
+    }
+  });
+
+  if (groups.length === 0) return [...tocPages, ...rest]; // no content pages — nothing to sort
+
+  if (pendingLeaders.length > 0) {
+    groups[0].leaders = [...pendingLeaders, ...groups[0].leaders];
+  }
+
+  // Names in `order` sort by their position in that list (first = first);
+  // anything not listed falls back to alphabetical, placed after every name
+  // that IS listed. Blank/undefined always sorts last of all.
+  const makeOrderComparator = (order: string[]) => {
+    const indexOf = new Map(order.map((name, i) => [name, i]));
+    return (a?: string, b?: string): number => {
+      if (!a && !b) return 0;
+      if (!a) return 1;
+      if (!b) return -1;
+      const ai = indexOf.get(a);
+      const bi = indexOf.get(b);
+      if (ai !== undefined && bi !== undefined) return ai - bi;
+      if (ai !== undefined) return -1;
+      if (bi !== undefined) return 1;
+      return a.localeCompare(b);
+    };
+  };
+
+  const compareCategory = makeOrderComparator(CATEGORY_ORDER);
+  const compareSubcategory = makeOrderComparator(SUBCATEGORY_ORDER);
+
+  groups.sort((a, b) => {
+    const catCmp = compareCategory(
+      'category' in a.anchor ? a.anchor.category : undefined,
+      'category' in b.anchor ? b.anchor.category : undefined,
+    );
+    if (catCmp !== 0) return catCmp;
+
+    const subCmp = compareSubcategory(
+      'subcategory' in a.anchor ? a.anchor.subcategory : undefined,
+      'subcategory' in b.anchor ? b.anchor.subcategory : undefined,
+    );
+    if (subCmp !== 0) return subCmp;
+
+    return a.originalIndex - b.originalIndex; // stable fallback
+  });
+
+  const orderedRest = groups.flatMap(g => [...g.leaders, g.anchor, ...g.trailers]);
+  return [...tocPages, ...orderedRest];
+}
+
+function processBook(bookId: string, excelPath: string, pagesHeader: string[]) {
   if (!fs.existsSync(excelPath)) {
     console.warn(`⚠️  Could not find Excel file at: ${excelPath}. Skipping.`);
     return null;
@@ -125,9 +246,7 @@ function processBook(bookId: string, excelPath: string) {
   }
 
   const pagesRaw: any[] = XLSX.utils.sheet_to_json(pagesSheet, {
-    header: ['pageNum', 'type', 'title', 'description', 'category', 'difficulty',
-             'itemsNote', 'columns', 'answerKeyUrl', 'actionNote', 'notePosition',
-             'noteRotation', 'noteIcon'],
+    header: pagesHeader,
     range: 4,
     defval: '',
   });
@@ -146,12 +265,13 @@ function processBook(bookId: string, excelPath: string) {
 
   const matchupsByPage = new Map<number, MatchupItem[]>();
   for (const row of matchupRaw) {
+    if (row.pageNum === '' || row.pageNum === undefined || row.pageNum === null) continue;
     const pageNum = Number(row.pageNum);
-    if (!pageNum) continue;
+    if (Number.isNaN(pageNum)) continue;
     if (!matchupsByPage.has(pageNum)) matchupsByPage.set(pageNum, []);
     matchupsByPage.get(pageNum)!.push({
-      centerText: String(row.centerText).trim(),
-      context:    String(row.context).trim(),
+      centerText: String(row.centerText ?? '').trim(),
+      context:    String(row.context ?? '').trim(),
     });
   }
 
@@ -159,38 +279,47 @@ function processBook(bookId: string, excelPath: string) {
   let warnings = 0;
 
   for (const row of pagesRaw) {
+    // pageNum only needs to be present — its literal value doesn't drive the
+    // final page number (page order in the sheet does), so 0 is valid, only
+    // a truly blank cell should skip the row.
+    if (row.pageNum === '' || row.pageNum === undefined || row.pageNum === null) continue;
     const pageNum = Number(row.pageNum);
-    if (!pageNum) continue;
+    if (Number.isNaN(pageNum)) continue;
 
-    const type       = String(row.type).trim().toLowerCase();
-    const title      = String(row.title).trim();
-    const desc       = String(row.description).trim();
+    const type       = String(row.type ?? '').trim().toLowerCase();
+    const title      = String(row.title ?? '').trim();
+    const desc       = String(row.description ?? '').trim();
     const columns    = Number(row.columns) || 1;
+    // Provisional — pages get reordered by category/subcategory below, so the
+    // real answerKeyUrl (based on final page position) is recomputed after that.
     const url        = `https://dykbtrivia.com/${bookId}/${pageNum}`;
-    const categoryRaw  = String(row.category).trim();
-    const difficultyRaw = String(row.difficulty).trim();
-    const category   = categoryRaw || undefined;
+    const categoryRaw    = String(row.category ?? '').trim();
+    const subcategoryRaw = String(row.subcategory ?? '').trim();
+    const difficultyRaw  = String(row.difficulty ?? '').trim();
+    const category    = categoryRaw || undefined;
+    const subcategory = subcategoryRaw || undefined;
     const difficulty = (['Easy', 'Medium', 'Hard'].includes(difficultyRaw) ? difficultyRaw : undefined) as PageDifficulty | undefined;
 
     let actionContent: ActionContent | undefined;
-    const noteText = String(row.actionNote).trim();
+    const noteText = String(row.actionNote ?? '').trim();
     if (noteText) {
       const rotation = Number(row.noteRotation);
       actionContent = {
         content:  noteText,
-        position: String(row.notePosition).trim().toLowerCase() === 'left' ? 'left' : 'right',
+        position: String(row.notePosition ?? '').trim().toLowerCase() === 'left' ? 'left' : 'right',
         rotation: isNaN(rotation) ? 0 : rotation,
-        icon:     String(row.noteIcon).trim() || '📌',
+        icon:     String(row.noteIcon ?? '').trim() || '📌',
       };
     }
 
     if (type === 'list') {
-      const itemsNote = String(row.itemsNote).trim();
+      const itemsNote = String(row.itemsNote ?? '').trim();
       pages.push({
         type:         'list',
         title,
         description:  desc,
         ...(category   ? { category }   : {}),
+        ...(subcategory ? { subcategory } : {}),
         ...(difficulty ? { difficulty } : {}),
         items:        parseItemsNote(itemsNote),
         columns,
@@ -208,6 +337,7 @@ function processBook(bookId: string, excelPath: string) {
         title,
         description:  desc,
         ...(category   ? { category }   : {}),
+        ...(subcategory ? { subcategory } : {}),
         ...(difficulty ? { difficulty } : {}),
         items,
         columns,
@@ -220,18 +350,25 @@ function processBook(bookId: string, excelPath: string) {
         content:      desc,
         answerKeyUrl: url,
       });
+    } else if (type === 'toc') {
+      pages.push({
+        type:         'toc',
+        title:        title || 'Table of Contents',
+        answerKeyUrl: url,
+      });
     } else if (type === 'teams') {
       pages.push({
         type:         'teams',
         title,
         description:  desc,
         ...(category   ? { category }   : {}),
+        ...(subcategory ? { subcategory } : {}),
         ...(difficulty ? { difficulty } : {}),
         answerKeyUrl: url,
         ...(actionContent ? { actionContent } : {}),
       });
     } else if (type === 'bracket') {
-      const clueStyle = String(row.itemsNote).trim();
+      const clueStyle = String(row.itemsNote ?? '').trim();
       if (!clueStyle) {
         console.warn(`  ⚠️  [${bookId}] Page ${pageNum} is bracket but column G is empty.`);
         warnings++;
@@ -241,6 +378,7 @@ function processBook(bookId: string, excelPath: string) {
         title,
         description:  desc,
         ...(category   ? { category }   : {}),
+        ...(subcategory ? { subcategory } : {}),
         ...(difficulty ? { difficulty } : {}),
         clueStyle,
         answerKeyUrl: url,
@@ -252,7 +390,13 @@ function processBook(bookId: string, excelPath: string) {
     }
   }
 
-  return { pages, warnings };
+  const ordered = reorderPages(pages);
+  const finalPages = ordered.map((page, i) => ({
+    ...page,
+    answerKeyUrl: `https://dykbtrivia.com/${bookId}/${i + 1}`,
+  })) as PageConfig[];
+
+  return { pages: finalPages, warnings };
 }
 
 // ── Code-generation helpers ───────────────────────────────────────────────────
@@ -313,11 +457,16 @@ function serializePage(page: PageConfig): string {
     lines.push(`  type: 'text',`);
     lines.push(`  content: ${JSON.stringify(page.content)},`);
     lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)}`);
+  } else if (page.type === 'toc') {
+    lines.push(`  type: 'toc',`);
+    lines.push(`  title: ${JSON.stringify(page.title)},`);
+    lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)}`);
   } else if (page.type === 'teams') {
     lines.push(`  type: 'teams',`);
     lines.push(`  title: ${JSON.stringify(page.title)},`);
     lines.push(`  description: ${JSON.stringify(page.description)},`);
-    if (page.category)   lines.push(`  category: ${JSON.stringify(page.category)},`);
+    if (page.category)    lines.push(`  category: ${JSON.stringify(page.category)},`);
+    if (page.subcategory) lines.push(`  subcategory: ${JSON.stringify(page.subcategory)},`);
     if (page.difficulty) lines.push(`  difficulty: '${page.difficulty}',`);
     lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)},`);
     if (page.actionContent) {
@@ -328,7 +477,8 @@ function serializePage(page: PageConfig): string {
     lines.push(`  type: 'bracket',`);
     lines.push(`  title: ${JSON.stringify(page.title)},`);
     lines.push(`  description: ${JSON.stringify(page.description)},`);
-    if (page.category)   lines.push(`  category: ${JSON.stringify(page.category)},`);
+    if (page.category)    lines.push(`  category: ${JSON.stringify(page.category)},`);
+    if (page.subcategory) lines.push(`  subcategory: ${JSON.stringify(page.subcategory)},`);
     if (page.difficulty) lines.push(`  difficulty: '${page.difficulty}',`);
     lines.push(`  clueStyle: ${JSON.stringify(page.clueStyle)},`);
     lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)},`);
@@ -340,8 +490,9 @@ function serializePage(page: PageConfig): string {
     lines.push(`  type: '${page.type}',`);
     lines.push(`  title: ${JSON.stringify(page.title)},`);
     lines.push(`  description: ${JSON.stringify(page.description)},`);
-    if ('category'   in page && page.category)   lines.push(`  category: ${JSON.stringify(page.category)},`);
-    if ('difficulty' in page && page.difficulty) lines.push(`  difficulty: '${page.difficulty}',`);
+    if ('category'    in page && page.category)    lines.push(`  category: ${JSON.stringify(page.category)},`);
+    if ('subcategory' in page && page.subcategory) lines.push(`  subcategory: ${JSON.stringify(page.subcategory)},`);
+    if ('difficulty'  in page && page.difficulty)  lines.push(`  difficulty: '${page.difficulty}',`);
 
     if (page.type === 'list') {
       const itemsStr = serializeListItems(page.items);
@@ -368,7 +519,7 @@ const bookConfigs: string[] = [];
 let totalWarnings = 0;
 
 for (const book of BOOKS) {
-  const result = processBook(book.id, book.file);
+  const result = processBook(book.id, book.file, book.pagesHeader);
   if (!result) continue;
 
   totalWarnings += result.warnings;
