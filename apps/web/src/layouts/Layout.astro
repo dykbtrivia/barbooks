@@ -10,7 +10,10 @@ import PageFooter from '../components/PageFooter.astro';
 import TocSidePanel from '../components/TocSidePanel.astro';
 import type { ActionContent, PageDifficulty, PageType } from '../utils/pageTypes.js';
 import type { TocCategoryEntry } from '../utils/tocBuilder.js';
+import type { PageSummary } from '../utils/pagesSummary.js';
 import { booksConfig } from '../utils/pageConfig.js';
+import { buildToc } from '../utils/tocBuilder.js';
+import { buildPagesSummary } from '../utils/pagesSummary.js';
 
 interface Props {
   title: string;
@@ -24,20 +27,24 @@ interface Props {
   actionContent?: ActionContent;
   itemCount?: number;
   pageType?: PageType;
+  // Callers that already resolved the book's pages (e.g. [book]/[page].astro)
+  // should pass these to avoid recomputing them — Layout only derives them
+  // itself as a fallback for callers that don't (e.g. 404.astro).
   tocEntries?: TocCategoryEntry[];
+  pagesSummary?: PageSummary[];
+  totalPages?: number;
 }
 
-const { title, currentPage = 1, answerKeyUrl, bookId = 'nfl', pageTitle, pageDescription, category, difficulty, actionContent, itemCount, pageType, tocEntries = [] } = Astro.props as Props;
+const {
+  title, currentPage = 1, answerKeyUrl, bookId = 'nfl', pageTitle, pageDescription,
+  category, difficulty, actionContent, itemCount, pageType,
+  tocEntries: tocEntriesProp, pagesSummary: pagesSummaryProp, totalPages: totalPagesProp,
+} = Astro.props as Props;
 
 const book = booksConfig[bookId];
-const totalPages = book?.pages.length ?? 0;
-const pagesSummary = book ? book.pages.map((page, i) => ({
-  pageNum: i + 1,
-  label: ('title' in page && page.title) ? page.title : `(${page.type})`,
-  type: page.type,
-  category: ('category' in page && page.category) ? page.category : '',
-  difficulty: ('difficulty' in page && page.difficulty) ? page.difficulty : '',
-})) : [];
+const totalPages = totalPagesProp ?? book?.pages.length ?? 0;
+const pagesSummary = pagesSummaryProp ?? (book ? buildPagesSummary(book.pages) : []);
+const tocEntries = tocEntriesProp ?? (book ? buildToc(book.pages) : []);
 ---
 
 <!DOCTYPE html>

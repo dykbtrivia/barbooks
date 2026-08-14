@@ -7,6 +7,7 @@ import PlayoffBracket from '../../components/PlayoffBracket.astro';
 import TableOfContents from '../../components/page-types/TableOfContents.astro';
 import { booksConfig } from '../../utils/pageConfig.js';
 import { buildToc } from '../../utils/tocBuilder.js';
+import { buildPagesSummary } from '../../utils/pagesSummary.js';
 import type { GetStaticPaths } from 'astro';
 import type { PageConfiguration } from '../../utils/pageTypes.js';
 
@@ -52,9 +53,11 @@ const itemCount = pageConfiguration.type === 'list' ? pageConfiguration.items.le
                 : undefined;
 const pageType = pageConfiguration.type;
 const tocEntries = buildToc(bookConfig.pages);
+const pagesSummary = buildPagesSummary(bookConfig.pages);
+const totalPages = bookConfig.pages.length;
 ---
 
-<Layout title={title} currentPage={pageNumber} answerKeyUrl={answerKeyUrl} bookId={bookId} pageTitle={pageTitle} pageDescription={pageDescription} category={category} difficulty={difficulty} itemCount={itemCount} pageType={pageType} tocEntries={tocEntries}>
+<Layout title={title} currentPage={pageNumber} answerKeyUrl={answerKeyUrl} bookId={bookId} pageTitle={pageTitle} pageDescription={pageDescription} category={category} difficulty={difficulty} itemCount={itemCount} pageType={pageType} tocEntries={tocEntries} pagesSummary={pagesSummary} totalPages={totalPages}>
   <div class="relative bg-white rounded-lg shadow-lg p-8 px-24 pt-2 max-w-4xl mx-auto print:bg-transparent print:shadow-none print:p-0 print:pt-0 print:max-w-none print:m-0 print:pb-0 print:rounded-none">
     <div class="prose prose-lg max-w-none">
       {pageConfiguration.type === 'list' && (
