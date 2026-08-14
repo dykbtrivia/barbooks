@@ -1,19 +1,15 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import List from '../../components/page-types/List.astro';
-import Matchup from '../../components/page-types/Matchup.astro';
-import Teams from '../../components/page-types/Teams.astro';
-import PlayoffBracket from '../../components/PlayoffBracket.astro';
-import TableOfContents from '../../components/page-types/TableOfContents.astro';
 import { booksConfig } from '../../utils/pageConfig.js';
 import { buildToc } from '../../utils/tocBuilder.js';
 import { buildPagesSummary } from '../../utils/pagesSummary.js';
+import { pageTypeRegistry } from '../../utils/pageTypeRegistry.js';
 import type { GetStaticPaths } from 'astro';
 import type { PageConfiguration } from '../../utils/pageTypes.js';
 
 export const getStaticPaths: GetStaticPaths = () => {
   const paths: Array<{ params: { book: string, page: string } }> = [];
-  
+
   for (const [bookId, bookConfig] of Object.entries(booksConfig)) {
     for (let i = 1; i <= bookConfig.pages.length; i++) {
       paths.push({
@@ -21,7 +17,7 @@ export const getStaticPaths: GetStaticPaths = () => {
       });
     }
   }
-  
+
   return paths;
 };
 
@@ -43,56 +39,42 @@ if (!bookConfig.pageExists(pageNumber)) {
 const pageConfiguration: PageConfiguration = bookConfig.getPageConfiguration(pageNumber);
 const answerKeyUrl: string = bookConfig.getAnswerKeyUrl(pageNumber);
 const title: string = `${bookId.toUpperCase()} Book - Page ${pageNumber}`;
-const hasHeaderFields = pageConfiguration.type === 'list' || pageConfiguration.type === 'matchup' || pageConfiguration.type === 'teams' || pageConfiguration.type === 'bracket';
-const pageTitle = hasHeaderFields ? pageConfiguration.title : undefined;
-const pageDescription = hasHeaderFields ? pageConfiguration.description : undefined;
-const category = hasHeaderFields ? pageConfiguration.category : undefined;
-const difficulty = hasHeaderFields ? pageConfiguration.difficulty : undefined;
-const itemCount = pageConfiguration.type === 'list' ? pageConfiguration.items.length
-                : pageConfiguration.type === 'matchup' ? pageConfiguration.items.length
-                : undefined;
 const pageType = pageConfiguration.type;
 const tocEntries = buildToc(bookConfig.pages);
 const pagesSummary = buildPagesSummary(bookConfig.pages);
 const totalPages = bookConfig.pages.length;
+
+// The registry owns everything type-specific: which component renders this
+// page, what props it needs, what goes in the header, and whether this type
+// gets a header/footer at all. Adding a new page type means adding one entry
+// to pageTypeRegistry.ts — this file doesn't change.
+const entry = pageTypeRegistry[pageType];
+const registryContext = { bookId, tocEntries };
+const componentProps = entry.getComponentProps(pageConfiguration, registryContext);
+const headerProps = entry.getHeaderProps(pageConfiguration);
+const PageComponent = entry.component;
 ---
 
-<Layout title={title} currentPage={pageNumber} answerKeyUrl={answerKeyUrl} bookId={bookId} pageTitle={pageTitle} pageDescription={pageDescription} category={category} difficulty={difficulty} itemCount={itemCount} pageType={pageType} tocEntries={tocEntries} pagesSummary={pagesSummary} totalPages={totalPages}>
+<Layout
+  title={title}
+  currentPage={pageNumber}
+  answerKeyUrl={answerKeyUrl}
+  bookId={bookId}
+  pageTitle={headerProps.title}
+  pageDescription={headerProps.description}
+  category={headerProps.category}
+  difficulty={headerProps.difficulty}
+  itemCount={headerProps.itemCount}
+  pageType={pageType}
+  tocEntries={tocEntries}
+  pagesSummary={pagesSummary}
+  totalPages={totalPages}
+  showsHeader={entry.showsHeader}
+  showsFooter={entry.showsFooter}
+>
   <div class="relative bg-white rounded-lg shadow-lg p-8 px-24 pt-2 max-w-4xl mx-auto print:bg-transparent print:shadow-none print:p-0 print:pt-0 print:max-w-none print:m-0 print:pb-0 print:rounded-none">
     <div class="prose prose-lg max-w-none">
-      {pageConfiguration.type === 'list' && (
-        <List
-          items={pageConfiguration.items}
-          columns={pageConfiguration.columns}
-          showInstructions={pageConfiguration.showInstructions}
-          instructionText={pageConfiguration.instructionText}
-        />
-      )}
-
-      {pageConfiguration.type === 'matchup' && (
-        <Matchup
-          items={pageConfiguration.items}
-          columns={pageConfiguration.columns}
-          showInstructions={pageConfiguration.showInstructions}
-          instructionText={pageConfiguration.instructionText}
-        />
-      )}
-      
-      {pageConfiguration.type === 'teams' && (
-        <Teams bookId={bookId} />
-      )}
-
-      {pageConfiguration.type === 'bracket' && (
-        <PlayoffBracket clueStyle={pageConfiguration.clueStyle} />
-      )}
-
-      {pageConfiguration.type === 'toc' && (
-        <TableOfContents entries={tocEntries} bookId={bookId} title={pageConfiguration.title} />
-      )}
-
-      {(pageConfiguration.type === 'text' || pageConfiguration.type === 'custom') && (
-        <div class="text-gray-700 leading-relaxed text-lg print:text-black print:text-base print:leading-relaxed" set:html={pageConfiguration.content}></div>
-      )}
+      <PageComponent {...componentProps} />
     </div>
   </div>
 </Layout>

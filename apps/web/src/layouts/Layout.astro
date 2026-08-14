@@ -33,12 +33,18 @@ interface Props {
   tocEntries?: TocCategoryEntry[];
   pagesSummary?: PageSummary[];
   totalPages?: number;
+  // Whether this page's type gets a PageHeader/PageFooter at all — driven by
+  // pageTypeRegistry.ts via [book]/[page].astro. Defaults to true so callers
+  // that don't pass it (e.g. 404.astro) keep getting both, as before.
+  showsHeader?: boolean;
+  showsFooter?: boolean;
 }
 
 const {
   title, currentPage = 1, answerKeyUrl, bookId = 'nfl', pageTitle, pageDescription,
   category, difficulty, actionContent, itemCount, pageType,
   tocEntries: tocEntriesProp, pagesSummary: pagesSummaryProp, totalPages: totalPagesProp,
+  showsHeader = true, showsFooter = true,
 } = Astro.props as Props;
 
 const book = booksConfig[bookId];
@@ -60,14 +66,14 @@ const tocEntries = tocEntriesProp ?? (book ? buildToc(book.pages) : []);
 <body class="bg-white min-h-screen flex flex-col">
   <div id="app" class="flex flex-col flex-1 print:h-full">
     <SiteHeader currentPage={currentPage} bookId={bookId} pages={pagesSummary} />
-    {pageType !== 'toc' && (
+    {showsHeader && (
       <PageHeader title={title} currentPage={currentPage} pageTitle={pageTitle} pageDescription={pageDescription} category={category} difficulty={difficulty} actionContent={actionContent} bookId={bookId} itemCount={itemCount} pageType={pageType} />
     )}
     <main class="flex-1 container mx-auto px-4 print:p-0 print:m-0 print:max-w-none print:flex print:flex-col print:justify-center">
       <slot />
     </main>
     <SiteFooter currentPage={currentPage} totalPages={totalPages} />
-    {pageType !== 'toc' && (
+    {showsFooter && (
       <PageFooter currentPage={currentPage} answerKeyUrl={answerKeyUrl} />
     )}
   </div>
