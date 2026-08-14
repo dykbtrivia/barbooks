@@ -51,9 +51,10 @@ const itemCount = pageConfiguration.type === 'list' ? pageConfiguration.items.le
                 : pageConfiguration.type === 'matchup' ? pageConfiguration.items.length
                 : undefined;
 const pageType = pageConfiguration.type;
+const tocEntries = buildToc(bookConfig.pages);
 ---
 
-<Layout title={title} currentPage={pageNumber} answerKeyUrl={answerKeyUrl} bookId={bookId} pageTitle={pageTitle} pageDescription={pageDescription} category={category} difficulty={difficulty} itemCount={itemCount} pageType={pageType}>
+<Layout title={title} currentPage={pageNumber} answerKeyUrl={answerKeyUrl} bookId={bookId} pageTitle={pageTitle} pageDescription={pageDescription} category={category} difficulty={difficulty} itemCount={itemCount} pageType={pageType} tocEntries={tocEntries}>
   <div class="relative bg-white rounded-lg shadow-lg p-8 px-24 pt-2 max-w-4xl mx-auto print:bg-transparent print:shadow-none print:p-0 print:pt-0 print:max-w-none print:m-0 print:pb-0 print:rounded-none">
     <div class="prose prose-lg max-w-none">
       {pageConfiguration.type === 'list' && (
@@ -83,7 +84,7 @@ const pageType = pageConfiguration.type;
       )}
 
       {pageConfiguration.type === 'toc' && (
-        <TableOfContents entries={buildToc(bookConfig.pages)} bookId={bookId} title={pageConfiguration.title} />
+        <TableOfContents entries={tocEntries} bookId={bookId} title={pageConfiguration.title} />
       )}
 
       {(pageConfiguration.type === 'text' || pageConfiguration.type === 'custom') && (

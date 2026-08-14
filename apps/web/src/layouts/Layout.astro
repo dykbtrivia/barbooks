@@ -9,8 +9,8 @@ import PageHeader from '../components/PageHeaderScorecard.astro';
 import PageFooter from '../components/PageFooter.astro';
 import TocSidePanel from '../components/TocSidePanel.astro';
 import type { ActionContent, PageDifficulty, PageType } from '../utils/pageTypes.js';
+import type { TocCategoryEntry } from '../utils/tocBuilder.js';
 import { booksConfig } from '../utils/pageConfig.js';
-import { buildToc } from '../utils/tocBuilder.js';
 
 interface Props {
   title: string;
@@ -24,9 +24,10 @@ interface Props {
   actionContent?: ActionContent;
   itemCount?: number;
   pageType?: PageType;
+  tocEntries?: TocCategoryEntry[];
 }
 
-const { title, currentPage = 1, answerKeyUrl, bookId = 'nfl', pageTitle, pageDescription, category, difficulty, actionContent, itemCount, pageType } = Astro.props as Props;
+const { title, currentPage = 1, answerKeyUrl, bookId = 'nfl', pageTitle, pageDescription, category, difficulty, actionContent, itemCount, pageType, tocEntries = [] } = Astro.props as Props;
 
 const book = booksConfig[bookId];
 const totalPages = book?.pages.length ?? 0;
@@ -37,7 +38,6 @@ const pagesSummary = book ? book.pages.map((page, i) => ({
   category: ('category' in page && page.category) ? page.category : '',
   difficulty: ('difficulty' in page && page.difficulty) ? page.difficulty : '',
 })) : [];
-const tocEntries = book ? buildToc(book.pages) : [];
 ---
 
 <!DOCTYPE html>
