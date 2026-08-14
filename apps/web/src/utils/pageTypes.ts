@@ -1,5 +1,5 @@
 // Define different page types
-export type PageType = 'list' | 'text' | 'custom' | 'matchup' | 'teams' | 'bracket';
+export type PageType = 'list' | 'text' | 'custom' | 'matchup' | 'teams' | 'bracket' | 'toc';
 
 export interface ListItem {
   // Flexible clue - can be any string or number
@@ -33,6 +33,7 @@ export interface ListPageConfig {
   title: string;
   description?: string;
   category?: string;
+  subcategory?: string;
   difficulty?: PageDifficulty;
   items: ListItem[];
   columns?: number;
@@ -61,6 +62,7 @@ export interface MatchupPageConfig {
   title: string;
   description?: string;
   category?: string;
+  subcategory?: string;
   difficulty?: PageDifficulty;
   items: MatchupItem[];
   columns?: number;
@@ -75,6 +77,7 @@ export interface TeamsPageConfig {
   title: string;
   description?: string;
   category?: string;
+  subcategory?: string;
   difficulty?: PageDifficulty;
   answerKeyUrl?: string;
   actionContent?: ActionContent;
@@ -85,6 +88,7 @@ export interface BracketPageConfig {
   title: string;
   description?: string;
   category?: string;
+  subcategory?: string;
   difficulty?: PageDifficulty;
   /** Raw column G value: "{prefix}: team1, team2, ..." or "...AFC teams... / ...NFC teams..." */
   clueStyle: string;
@@ -92,7 +96,13 @@ export interface BracketPageConfig {
   actionContent?: ActionContent;
 }
 
-export type PageConfiguration = ListPageConfig | TextPageConfig | CustomPageConfig | MatchupPageConfig | TeamsPageConfig | BracketPageConfig;
+export interface TocPageConfig {
+  type: 'toc';
+  title?: string;
+  answerKeyUrl?: string;
+}
+
+export type PageConfiguration = ListPageConfig | TextPageConfig | CustomPageConfig | MatchupPageConfig | TeamsPageConfig | BracketPageConfig | TocPageConfig;
 
 export interface PageConfig {
   pages: PageConfiguration[];

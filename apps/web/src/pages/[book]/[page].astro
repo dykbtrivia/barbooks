@@ -4,7 +4,9 @@ import List from '../../components/page-types/List.astro';
 import Matchup from '../../components/page-types/Matchup.astro';
 import Teams from '../../components/page-types/Teams.astro';
 import PlayoffBracket from '../../components/PlayoffBracket.astro';
+import TableOfContents from '../../components/page-types/TableOfContents.astro';
 import { booksConfig } from '../../utils/pageConfig.js';
+import { buildToc } from '../../utils/tocBuilder.js';
 import type { GetStaticPaths } from 'astro';
 import type { PageConfiguration } from '../../utils/pageTypes.js';
 
@@ -78,6 +80,10 @@ const pageType = pageConfiguration.type;
 
       {pageConfiguration.type === 'bracket' && (
         <PlayoffBracket clueStyle={pageConfiguration.clueStyle} />
+      )}
+
+      {pageConfiguration.type === 'toc' && (
+        <TableOfContents entries={buildToc(bookConfig.pages)} bookId={bookId} title={pageConfiguration.title} />
       )}
 
       {(pageConfiguration.type === 'text' || pageConfiguration.type === 'custom') && (

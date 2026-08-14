@@ -1,0 +1,157 @@
+---
+import type { TocCategoryEntry } from '../utils/tocBuilder.js';
+
+interface Props {
+  entries: TocCategoryEntry[];
+  bookId: string;
+  currentPage?: number;
+}
+
+const { entries, bookId, currentPage = 1 } = Astro.props as Props;
+
+const sorted = [...entries].sort((a, b) => a.startingPage - b.startingPage);
+const activeName = sorted.reduce<string | null>((active, entry, i) => {
+  const next = sorted[i + 1];
+  const inRange = currentPage >= entry.startingPage && (!next || currentPage < next.startingPage);
+  return inRange ? entry.name : active;
+}, null);
+---
+
+<div id="toc-panel-backdrop" class="toc-panel-backdrop print:hidden"></div>
+
+<aside id="toc-panel" class="toc-panel print:hidden">
+  <div class="toc-panel-header">
+    <span class="toc-panel-title">Table of Contents</span>
+    <button id="toc-panel-close" type="button" aria-label="Close table of contents">&times;</button>
+  </div>
+  <nav class="toc-panel-body">
+    {entries.map(entry => (
+      <a
+        class:list={['toc-panel-row', { active: entry.name === activeName }]}
+        href={`/${bookId}/${entry.startingPage}/`}
+      >
+        <span class="toc-panel-name">{entry.name}</span>
+        <span class="toc-panel-page-num">{entry.startingPage}</span>
+      </a>
+    ))}
+  </nav>
+</aside>
+
+<style>
+  .toc-panel-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 40;
+  }
+
+  .toc-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 100%;
+    background: #fff;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  :global(body.toc-panel-open) .toc-panel-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  :global(body.toc-panel-open) .toc-panel {
+    transform: translateX(0);
+  }
+
+  .toc-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 2px solid #111;
+  }
+
+  .toc-panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    color: #111;
+  }
+
+  #toc-panel-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    color: #555;
+    padding: 0 4px;
+  }
+
+  .toc-panel-body {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+  }
+
+  .toc-panel-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: inherit;
+    border-left: 3px solid transparent;
+  }
+
+  .toc-panel-row:hover {
+    background: #f5f5f5;
+  }
+
+  .toc-panel-row.active {
+    background: #f0f4ff;
+    border-left-color: #111;
+  }
+
+  .toc-panel-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #111;
+  }
+
+  .toc-panel-page-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    color: #555;
+  }
+
+  @media (max-width: 480px) {
+    .toc-panel {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  function closeTocPanel() {
+    document.body.classList.remove('toc-panel-open');
+  }
+
+  document.getElementById('toc-panel-close')?.addEventListener('click', closeTocPanel);
+  document.getElementById('toc-panel-backdrop')?.addEventListener('click', closeTocPanel);
+</script>
