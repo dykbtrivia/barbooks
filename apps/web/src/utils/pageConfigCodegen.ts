@@ -6,7 +6,7 @@
  * I/O, no parsing/ordering decisions.
  */
 
-import type { ActionContent, MatchupItem, PageConfig } from './excelSyncTypes.js';
+import type { ActionContent, MatchupItem, PageConfig, PageDifficulty } from './excelSyncTypes.js';
 
 function indent(str: string, spaces: number): string {
   const pad = ' '.repeat(spaces);
@@ -58,6 +58,23 @@ function serializeMatchupItems(items: MatchupItem[]): string {
   return `[\n${lines.join('\n')}\n]`;
 }
 
+// category/subcategory/difficulty are serialized identically for every
+// content page type — shared here so each branch only differs in its own
+// type-specific line(s).
+function serializeCategorization(page: { category?: string; subcategory?: string; difficulty?: PageDifficulty }): string[] {
+  const lines: string[] = [];
+  if (page.category)    lines.push(`  category: ${JSON.stringify(page.category)},`);
+  if (page.subcategory) lines.push(`  subcategory: ${JSON.stringify(page.subcategory)},`);
+  if (page.difficulty)  lines.push(`  difficulty: '${page.difficulty}',`);
+  return lines;
+}
+
+function serializeActionContentLine(actionContent?: ActionContent): string[] {
+  if (!actionContent) return [];
+  const acStr = serializeActionContent(actionContent);
+  return [`  actionContent: ${acStr.split('\n').join('\n  ')}`];
+}
+
 export function serializePage(page: PageConfig): string {
   const lines: string[] = ['{'];
 
@@ -73,34 +90,22 @@ export function serializePage(page: PageConfig): string {
     lines.push(`  type: 'teams',`);
     lines.push(`  title: ${JSON.stringify(page.title)},`);
     lines.push(`  description: ${JSON.stringify(page.description)},`);
-    if (page.category)    lines.push(`  category: ${JSON.stringify(page.category)},`);
-    if (page.subcategory) lines.push(`  subcategory: ${JSON.stringify(page.subcategory)},`);
-    if (page.difficulty) lines.push(`  difficulty: '${page.difficulty}',`);
+    lines.push(...serializeCategorization(page));
     lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)},`);
-    if (page.actionContent) {
-      const acStr = serializeActionContent(page.actionContent);
-      lines.push(`  actionContent: ${acStr.split('\n').join('\n  ')}`);
-    }
+    lines.push(...serializeActionContentLine(page.actionContent));
   } else if (page.type === 'bracket') {
     lines.push(`  type: 'bracket',`);
     lines.push(`  title: ${JSON.stringify(page.title)},`);
     lines.push(`  description: ${JSON.stringify(page.description)},`);
-    if (page.category)    lines.push(`  category: ${JSON.stringify(page.category)},`);
-    if (page.subcategory) lines.push(`  subcategory: ${JSON.stringify(page.subcategory)},`);
-    if (page.difficulty) lines.push(`  difficulty: '${page.difficulty}',`);
+    lines.push(...serializeCategorization(page));
     lines.push(`  clueStyle: ${JSON.stringify(page.clueStyle)},`);
     lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)},`);
-    if (page.actionContent) {
-      const acStr = serializeActionContent(page.actionContent);
-      lines.push(`  actionContent: ${acStr.split('\n').join('\n  ')}`);
-    }
+    lines.push(...serializeActionContentLine(page.actionContent));
   } else {
     lines.push(`  type: '${page.type}',`);
     lines.push(`  title: ${JSON.stringify(page.title)},`);
     lines.push(`  description: ${JSON.stringify(page.description)},`);
-    if ('category'    in page && page.category)    lines.push(`  category: ${JSON.stringify(page.category)},`);
-    if ('subcategory' in page && page.subcategory) lines.push(`  subcategory: ${JSON.stringify(page.subcategory)},`);
-    if ('difficulty'  in page && page.difficulty)  lines.push(`  difficulty: '${page.difficulty}',`);
+    lines.push(...serializeCategorization(page));
 
     if (page.type === 'list') {
       const itemsStr = serializeListItems(page.items);
@@ -112,11 +117,7 @@ export function serializePage(page: PageConfig): string {
 
     lines.push(`  columns: ${page.columns},`);
     lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)},`);
-
-    if ('actionContent' in page && page.actionContent) {
-      const acStr = serializeActionContent(page.actionContent);
-      lines.push(`  actionContent: ${acStr.split('\n').join('\n  ')}`);
-    }
+    lines.push(...serializeActionContentLine(page.actionContent));
   }
 
   lines.push('}');

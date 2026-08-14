@@ -36,6 +36,44 @@ export function parseItemsNote(note: string): { clue: string | number }[] {
   return Array.from({ length: count }, () => ({ clue: '' }));
 }
 
+interface CommonFields {
+  category?: string;
+  subcategory?: string;
+  difficulty?: PageDifficulty;
+  actionContent?: ActionContent;
+}
+
+// category/subcategory/difficulty/actionContent are handled identically by
+// list, matchup, teams, and bracket rows — extracted once so each type's
+// branch only has to spread the result rather than repeat this per type.
+function extractCommonFields(row: any): CommonFields {
+  const categoryRaw    = String(row.category ?? '').trim();
+  const subcategoryRaw = String(row.subcategory ?? '').trim();
+  const difficultyRaw  = String(row.difficulty ?? '').trim();
+  const category    = categoryRaw || undefined;
+  const subcategory = subcategoryRaw || undefined;
+  const difficulty = (['Easy', 'Medium', 'Hard'].includes(difficultyRaw) ? difficultyRaw : undefined) as PageDifficulty | undefined;
+
+  let actionContent: ActionContent | undefined;
+  const noteText = String(row.actionNote ?? '').trim();
+  if (noteText) {
+    const rotation = Number(row.noteRotation);
+    actionContent = {
+      content:  noteText,
+      position: String(row.notePosition ?? '').trim().toLowerCase() === 'left' ? 'left' : 'right',
+      rotation: isNaN(rotation) ? 0 : rotation,
+      icon:     String(row.noteIcon ?? '').trim() || '📌',
+    };
+  }
+
+  return {
+    ...(category    ? { category }    : {}),
+    ...(subcategory ? { subcategory } : {}),
+    ...(difficulty  ? { difficulty }  : {}),
+    ...(actionContent ? { actionContent } : {}),
+  };
+}
+
 function buildMatchupsByPage(matchupRaw: any[]): Map<number, MatchupItem[]> {
   const matchupsByPage = new Map<number, MatchupItem[]>();
   for (const row of matchupRaw) {
@@ -72,24 +110,7 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
     // Provisional — pageOrder.reorderPages recomputes the real answerKeyUrl
     // from each page's final position.
     const url        = `https://dykbtrivia.com/${bookId}/${pageNum}`;
-    const categoryRaw    = String(row.category ?? '').trim();
-    const subcategoryRaw = String(row.subcategory ?? '').trim();
-    const difficultyRaw  = String(row.difficulty ?? '').trim();
-    const category    = categoryRaw || undefined;
-    const subcategory = subcategoryRaw || undefined;
-    const difficulty = (['Easy', 'Medium', 'Hard'].includes(difficultyRaw) ? difficultyRaw : undefined) as PageDifficulty | undefined;
-
-    let actionContent: ActionContent | undefined;
-    const noteText = String(row.actionNote ?? '').trim();
-    if (noteText) {
-      const rotation = Number(row.noteRotation);
-      actionContent = {
-        content:  noteText,
-        position: String(row.notePosition ?? '').trim().toLowerCase() === 'left' ? 'left' : 'right',
-        rotation: isNaN(rotation) ? 0 : rotation,
-        icon:     String(row.noteIcon ?? '').trim() || '📌',
-      };
-    }
+    const commonFields = extractCommonFields(row);
 
     if (type === 'list') {
       const itemsNote = String(row.itemsNote ?? '').trim();
@@ -97,13 +118,10 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
         type:         'list',
         title,
         description:  desc,
-        ...(category   ? { category }   : {}),
-        ...(subcategory ? { subcategory } : {}),
-        ...(difficulty ? { difficulty } : {}),
+        ...commonFields,
         items:        parseItemsNote(itemsNote),
         columns,
         answerKeyUrl: url,
-        ...(actionContent ? { actionContent } : {}),
       });
     } else if (type === 'matchup') {
       const items = matchupsByPage.get(pageNum) ?? [];
@@ -115,13 +133,10 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
         type:         'matchup',
         title,
         description:  desc,
-        ...(category   ? { category }   : {}),
-        ...(subcategory ? { subcategory } : {}),
-        ...(difficulty ? { difficulty } : {}),
+        ...commonFields,
         items,
         columns,
         answerKeyUrl: url,
-        ...(actionContent ? { actionContent } : {}),
       });
     } else if (type === 'text') {
       pages.push({
@@ -140,11 +155,8 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
         type:         'teams',
         title,
         description:  desc,
-        ...(category   ? { category }   : {}),
-        ...(subcategory ? { subcategory } : {}),
-        ...(difficulty ? { difficulty } : {}),
+        ...commonFields,
         answerKeyUrl: url,
-        ...(actionContent ? { actionContent } : {}),
       });
     } else if (type === 'bracket') {
       const clueStyle = String(row.itemsNote ?? '').trim();
@@ -156,12 +168,9 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
         type:         'bracket',
         title,
         description:  desc,
-        ...(category   ? { category }   : {}),
-        ...(subcategory ? { subcategory } : {}),
-        ...(difficulty ? { difficulty } : {}),
+        ...commonFields,
         clueStyle,
         answerKeyUrl: url,
-        ...(actionContent ? { actionContent } : {}),
       });
     } else {
       console.warn(`  ⚠️  [${bookId}] Page ${pageNum} has unknown type "${type}".`);
