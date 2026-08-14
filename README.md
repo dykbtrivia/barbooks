@@ -34,9 +34,10 @@ barbooks/
 │   │       │   ├── index.astro      # Redirects to /barbooks/nfl/1/
 │   │       │   └── [book]/[page].astro  # Dynamic route for all pages
 │   │       └── utils/
-│   │           ├── pageTypes.ts     # TypeScript interfaces
-│   │           ├── pageConfig.ts    # Auto-generated page content (do not edit)
-│   │           └── excelToJson.ts   # Excel → pageConfig.ts generator
+│   │           ├── pageTypes.ts         # TypeScript interfaces
+│   │           ├── pageTypeRegistry.ts  # Per-page-type renderer/props registry
+│   │           ├── pageConfig.ts        # Auto-generated page content (do not edit)
+│   │           └── excelToJson.ts       # Excel → pageConfig.ts sync pipeline (parse/order/codegen)
 │   │
 │   └── worker/                      # Cloudflare Worker (QR redirect + analytics)
 │       ├── src/index.ts             # Request handler / router
@@ -112,8 +113,13 @@ Content is authored entirely in the Excel files — **never edit `pageConfig.ts`
 |---|---|
 | `list` | Numbered fill-in-the-blank items with optional clues (year, rank, etc.) |
 | `matchup` | Head-to-head comparisons with a center label (e.g. score, "vs") |
+| `teams` | One-item-per-team layout |
+| `bracket` | Playoff-bracket layout |
+| `toc` | Auto-built table of contents, grouped by category/subcategory |
 | `text` | Plain paragraph content — intro pages, rules, etc. |
 | `custom` | Arbitrary HTML for special layouts |
+
+Each type's renderer, props, and header behavior are registered in `apps/web/src/utils/pageTypeRegistry.ts` — adding a new type means adding one entry there.
 
 ## QR Code Redirects
 
