@@ -283,7 +283,7 @@ The print footer QR is build-time only because `answerKeyUrl` is known at build 
 The app deploys automatically to GitHub Pages on every push to `main`.
 
 GitHub Actions workflow (`.github/workflows/deploy.yml`):
-1. Checkout → Setup Node 18 → `npm install`
+1. Checkout → Setup Node 20 → `npm install`
 2. Configure GitHub Pages base URL
 3. `npm run build` → Upload `dist/` artifact → Deploy to Pages
 

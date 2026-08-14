@@ -1,5 +1,4 @@
-// @ts-ignore
-import qrcode from 'qrcode-generator';
+import QRCode from 'qrcode';
 
 // Global config interface
 declare global {
@@ -83,7 +82,7 @@ class BookApp {
 
   private async addVisibleQRCode(pageNumber: number): Promise<void> {
     // Add QR code to center section of footer
-    const centerSection = document.querySelector('footer .container > div > div:nth-child(2)');
+    const centerSection = document.getElementById('footer-center');
     if (!centerSection) return;
     
     const existingQR = document.querySelector('.footer-qr');
@@ -106,13 +105,8 @@ class BookApp {
     
     try {
       await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // @ts-ignore
-      const qr = qrcode(0, 'M');
-      qr.addData(answerUrl);
-      qr.make();
-      
-      const qrSvg = qr.createSvgTag(3, 0);
+
+      const qrSvg = await QRCode.toString(answerUrl, { type: 'svg', margin: 1, color: { dark: '#000000', light: '#ffffff' } });
 
       const qrContainer = document.createElement('div');
       qrContainer.innerHTML = qrSvg;

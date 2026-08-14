@@ -8,12 +8,22 @@ import type { GetStaticPaths } from 'astro';
 import type { PageConfiguration } from '../../utils/pageTypes.js';
 
 export const getStaticPaths: GetStaticPaths = () => {
-  const paths: Array<{ params: { book: string, page: string } }> = [];
+  const paths: Array<{
+    params: { book: string, page: string },
+    props: { tocEntries: ReturnType<typeof buildToc>, pagesSummary: ReturnType<typeof buildPagesSummary> },
+  }> = [];
 
   for (const [bookId, bookConfig] of Object.entries(booksConfig)) {
+    // Computed once per book (not per page) — every page within a book shares
+    // the same TOC and pages summary, so build them here and hand them down
+    // via props rather than recomputing per generated page.
+    const tocEntries = buildToc(bookConfig.pages);
+    const pagesSummary = buildPagesSummary(bookConfig.pages);
+
     for (let i = 1; i <= bookConfig.pages.length; i++) {
       paths.push({
-        params: { book: bookId, page: i.toString() }
+        params: { book: bookId, page: i.toString() },
+        props: { tocEntries, pagesSummary },
       });
     }
   }
@@ -22,6 +32,7 @@ export const getStaticPaths: GetStaticPaths = () => {
 };
 
 const { book, page } = Astro.params;
+const { tocEntries, pagesSummary } = Astro.props;
 const pageNumber: number = parseInt(page as string);
 const bookId: string = book as string;
 
@@ -40,8 +51,6 @@ const pageConfiguration: PageConfiguration = bookConfig.getPageConfiguration(pag
 const answerKeyUrl: string = bookConfig.getAnswerKeyUrl(pageNumber);
 const title: string = `${bookId.toUpperCase()} Book - Page ${pageNumber}`;
 const pageType = pageConfiguration.type;
-const tocEntries = buildToc(bookConfig.pages);
-const pagesSummary = buildPagesSummary(bookConfig.pages);
 const totalPages = bookConfig.pages.length;
 
 // The registry owns everything type-specific: which component renders this
