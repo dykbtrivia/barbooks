@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### How it works end-to-end
 
 1. **Content is authored in Excel** (e.g., `NFL Barbook Trivia.xlsx`). Each row defines one page of the book.
-2. **The spreadsheet is converted to TypeScript** via `npm run sync-pages`, generating `src/utils/pageConfig.ts`.
+2. **The spreadsheet is converted to TypeScript** via `npm run sync-pages`, generating `apps/web/src/utils/pageConfig.ts`.
 3. **An Astro site** provides a browsable, print-ready web view of every page, deployed to GitHub Pages.
 4. **A PDF generation script** (headless browser, one PDF per page) visits each page URL and prints it, then stitches the PDFs into a single book-ready file.
 5. **The final PDF** is submitted to a print-on-demand service for physical distribution.
@@ -36,10 +36,13 @@ cd ../worker && npx wrangler kv bulk put --namespace-id <id> kv-seed.json
 |------|-------------|---------|
 | `list` | Numbered fill-in-the-blank items with optional clues (year, rank, etc.) | "Name the last 25 Super Bowl MVPs" |
 | `matchup` | Head-to-head comparisons with a center label | "Score: 49ers 38 vs Chiefs 35" |
+| `teams` | One-item-per-team layout | Per-team trivia grid |
+| `bracket` | Playoff-bracket layout, clue style driven by `itemsNote`/column G | Fill-in-the-bracket pages |
+| `toc` | Auto-built table of contents, grouped by category/subcategory | Book's front-matter TOC page |
 | `text` | Plain paragraph content | Intro pages, rules, etc. |
 | `custom` | Arbitrary HTML | Special layouts |
 
-Additional page types (e.g., one-item-per-team, division breakdowns) are planned for future additions.
+Every page type — its renderer component, the props it needs, and whether it gets a `PageHeader`/`PageFooter` — is registered in one place: `apps/web/src/utils/pageTypeRegistry.ts`.
 
 ### Sports scope
 
@@ -50,7 +53,7 @@ NFL is the initial focus. Other sports (NBA, MLB, etc.) are planned as future vo
 - `npm run dev` - Start local development server at localhost:4321
 - `npm run build` - Build production site to `./dist/`
 - `npm run preview` - Preview the built site locally
-- `npm run sync-pages` - Regenerate `src/utils/pageConfig.ts` from sport-specific Excel files
+- `npm run sync-pages` - Regenerate `apps/web/src/utils/pageConfig.ts` from sport-specific Excel files
 - `npm run generate-pdf` - Generate a print-ready PDF book (see [PDF Generation](#pdf-generation) below)
 - `npm run astro` - Run Astro CLI commands directly
 
@@ -62,35 +65,50 @@ This is an Astro-based book reader application designed for GitHub Pages deploym
 
 ### Directory Structure
 
+This is a monorepo: `apps/web` is the Astro site, `apps/worker` is the Cloudflare Worker that handles the QR redirect flow (see below). Root-level `package.json` scripts delegate into each app.
+
 ```
 barbooks/
 ├── .claude/agents/book-page-creator.md  # Claude sub-agent for page creation
 ├── .github/workflows/deploy.yml         # GitHub Actions CI/CD to GitHub Pages
-├── scripts/
-│   └── generate-pdf.ts                  # PDF generation script (Playwright + pdf-lib)
-├── public/favicon.svg
-├── src/
-│   ├── components/
-│   │   ├── ActionContent.astro          # Decorative rotating badge
-│   │   ├── List.astro                   # Quiz/list page renderer
-│   │   ├── Matchup.astro                # Head-to-head comparison renderer
-│   │   ├── SiteHeader.astro             # Top nav bar (hidden in print)
-│   │   ├── SiteFooter.astro             # Bottom nav bar (hidden in print)
-│   │   ├── PageHeader.astro             # In-page title/description header
-│   │   └── PageFooter.astro             # Print-only footer with QR code
-│   ├── layouts/Layout.astro             # Root HTML template
-│   ├── pages/
-│   │   ├── index.astro                  # Redirects to /barbooks/nfl/1/
-│   │   ├── [book]/[page].astro          # Dynamic route: generates pages for all books
-│   │   └── 404.astro                    # Not found page
-│   ├── scripts/bookApp.ts               # Client-side navigation + QR codes
-│   ├── styles/global.css                # Tailwind v4 import
-│   └── utils/
-│       ├── pageTypes.ts                 # TypeScript interfaces for page types
-│       ├── pageConfig.ts                # Page content config (auto-generated)
-│       └── excelToJson.ts               # Excel-to-TS code generator script
-├── NFL Barbook Trivia.xlsx              # NFL source of truth
-├── NBA Barbook Trivia.xlsx              # NBA source of truth
+├── apps/
+│   ├── web/
+│   │   ├── scripts/generate-pdf.ts      # PDF generation script (Playwright + pdf-lib)
+│   │   ├── scripts/seed-kv.ts           # Seeds the Worker's KV store from Excel
+│   │   ├── public/favicon.svg
+│   │   ├── NFL Barbook Trivia.xlsx      # NFL source of truth
+│   │   ├── NBA Barbook Trivia.xlsx      # NBA source of truth
+│   │   └── src/
+│   │       ├── components/
+│   │       │   ├── page-types/          # One renderer per PageType (List, Matchup, Teams, TextContent, TableOfContents, …)
+│   │       │   ├── ActionContent.astro  # Decorative rotating badge
+│   │       │   ├── PlayoffBracket.astro # Bracket page renderer
+│   │       │   ├── SiteHeader.astro     # Top nav bar (hidden in print)
+│   │       │   ├── SiteFooter.astro     # Bottom nav bar (hidden in print)
+│   │       │   ├── PageHeaderScorecard.astro  # In-page title/description header (active variant)
+│   │       │   ├── TocSidePanel.astro   # On-screen jump-to-category panel
+│   │       │   └── PageFooter.astro     # Print-only footer with QR code
+│   │       ├── layouts/Layout.astro     # Root HTML template
+│   │       ├── pages/
+│   │       │   ├── index.astro          # Redirects to /barbooks/nfl/1/
+│   │       │   ├── [book]/[page].astro  # Dynamic route: generates pages for all books
+│   │       │   └── 404.astro            # Not found page
+│   │       ├── scripts/bookApp.ts       # Client-side navigation + QR codes
+│   │       ├── styles/global.css        # Tailwind v4 import
+│   │       └── utils/
+│   │           ├── pageTypes.ts         # TypeScript interfaces for the PageConfiguration union
+│   │           ├── pageTypeRegistry.ts  # Per-PageType renderer/props/header registry — see below
+│   │           ├── pageConfig.ts        # Page content config (auto-generated — DO NOT EDIT)
+│   │           ├── excelToJson.ts       # Sync entrypoint: orchestrates parse → order → codegen
+│   │           ├── excelParser.ts       # Raw Excel rows → PageConfig objects
+│   │           ├── excelSyncTypes.ts    # Shared types for the sync pipeline
+│   │           ├── pageOrder.ts         # Category/subcategory ordering + final answerKeyUrl assignment
+│   │           ├── pageConfigCodegen.ts # PageConfig[] → pageConfig.ts source text
+│   │           ├── tocBuilder.ts        # Builds TOC entries from ordered pages
+│   │           └── pagesSummary.ts      # Builds the page list used by SiteHeader's page picker
+│   └── worker/
+│       ├── src/index.ts                 # QR redirect handler (KV lookup)
+│       └── wrangler.toml
 ├── astro.config.mjs
 ├── tsconfig.json
 └── package.json
@@ -102,10 +120,16 @@ barbooks/
 
 Workflow for updating pages:
 1. Edit the relevant Excel file (two sheets: **Pages** and **Matchup Items**)
-2. Run `npm run sync-pages` to regenerate `src/utils/pageConfig.ts`
+2. Run `npm run sync-pages` to regenerate `apps/web/src/utils/pageConfig.ts`
 3. Verify with `npm run build`
 
-The sync script (`src/utils/excelToJson.ts`) reads all configured Excel files in the `BOOKS` array and emits TypeScript.
+The sync pipeline is split across four files, each with one job:
+- **`excelToJson.ts`** — orchestration only. Reads each book's Excel file per the `BOOKS` array, then calls the three files below in order and writes the result to `pageConfig.ts`.
+- **`excelParser.ts`** — turns raw Excel rows (Pages + Matchup Items) into `PageConfig` objects. No file I/O, no ordering decisions.
+- **`pageOrder.ts`** — decides final physical page order (grouped by category, then subcategory, per `CATEGORY_ORDER`/`SUBCATEGORY_ORDER`) and stamps each page's final `answerKeyUrl` to match, since the URL is derived from final position. To change how a book is organized, edit those two arrays here.
+- **`pageConfigCodegen.ts`** — pure text generation: ordered `PageConfig[]` → the `pageConfig.ts` source string.
+
+`excelSyncTypes.ts` holds the types shared across this pipeline — it mirrors the `PageConfiguration` union in `pageTypes.ts` but only carries the fields the sync side itself produces/consumes; the two are maintained by hand in parallel.
 
 #### Excel Sheet Schema
 
@@ -139,7 +163,7 @@ The sync script (`src/utils/excelToJson.ts`) reads all configured Excel files in
 
 ### TypeScript Interfaces (`src/utils/pageTypes.ts`)
 
-Four page configuration types are supported:
+Seven page configuration types are supported (see the full `PageType` union and interfaces in `pageTypes.ts`); the four most commonly authored are shown below:
 
 ```typescript
 // List page — numbered quiz items with fill-in-the-blank blanks
@@ -199,10 +223,15 @@ interface ActionContent {
 
 ### Dynamic Routing
 
-- `src/pages/[page].astro` pre-renders pages 1–100 at build time via `getStaticPaths()`
+- `src/pages/[book]/[page].astro` pre-renders every page of every book at build time via `getStaticPaths()`, driven by `booksConfig`
 - Invalid page numbers redirect to page 1
-- URL pattern: `/barbooks/{pageNum}/`
+- URL pattern: `/barbooks/{book}/{pageNum}/`
 - `pageConfig.getPageConfiguration(n)` returns the configured page or a fallback `text` page for unconfigured numbers
+- `[book]/[page].astro` itself does no per-type branching: it looks up `pageTypeRegistry[pageType]` to get the renderer component, its props, and header props, then passes `tocEntries`/`pagesSummary`/`totalPages` (computed once here) down into `Layout.astro` so it doesn't recompute them. `Layout.astro` still derives them itself as a fallback for callers that don't pass them (e.g. `404.astro`).
+
+### Page Type Registry (`src/utils/pageTypeRegistry.ts`)
+
+Single source of truth for "what does this page type need to render": which component, what props it needs (from the page config and from render-time context like `bookId`), what goes in the `PageHeader`, and whether the type gets a `PageHeader`/`PageFooter` at all (`toc` pages get neither). **Adding a new page type means adding one entry here** — `[book]/[page].astro` and `Layout.astro` don't need to change.
 
 ### Component Details
 
@@ -210,10 +239,15 @@ interface ActionContent {
 |-----------|---------|
 | `SiteHeader.astro` | Blue top nav with quick links, page number input, Print button. Hidden during print. |
 | `SiteFooter.astro` | Gray bottom nav with prev/next buttons and current page display. Hidden during print. |
-| `PageHeader.astro` | Centered title + description; renders `ActionContent` badge if provided. |
+| `PageHeaderScorecard.astro` | Centered title + description; renders `ActionContent` badge if provided. The active header variant — `PageHeader.astro`/`PageHeaderMagazine.astro` are unused alternates left in place to swap in manually. |
 | `PageFooter.astro` | Print-only footer. QR code is generated at build time via the `qrcode` Node package and inlined as SVG. Page number appears on the outer edge (left for odd pages, right for even pages). |
-| `List.astro` | Renders quiz items as `{clue} : _____` in a configurable grid. |
-| `Matchup.astro` | Renders matchup items as `_____ {centerText} _____` cards with optional context label. |
+| `TocSidePanel.astro` | On-screen side panel for jumping between categories/pages. |
+| `page-types/List.astro` | Renders quiz items as `{clue} : _____` in a configurable grid. |
+| `page-types/Matchup.astro` | Renders matchup items as `_____ {centerText} _____` cards with optional context label. |
+| `page-types/Teams.astro` | One-item-per-team layout, keyed off `bookId`. |
+| `page-types/TextContent.astro` | Renders `text`/`custom` page HTML content (`set:html`). |
+| `page-types/TableOfContents.astro` | Renders the `toc` page from `tocBuilder.ts` entries. |
+| `PlayoffBracket.astro` | Renders `bracket` pages from `clueStyle`. |
 | `ActionContent.astro` | Absolutely-positioned orange badge with icon and rotated content. |
 | `Layout.astro` | Root HTML template; passes `bookAppConfig` to the `window` object for `bookApp.ts`. |
 
@@ -314,7 +348,7 @@ npm run generate-pdf -- --book nfl --out ~/Desktop/nfl-draft.pdf
 3. **`text` page content** comes from the `description` column in the spreadsheet, not a separate `content` column.
 4. **Matchup items** must exist in the "Matchup Items" sheet; an empty items array will produce a warning during sync.
 5. **`clue` is preferred over `year`/`label`** in `ListItem` — the legacy fields still render but are deprecated.
-6. **Adding new page types** requires changes to `pageTypes.ts`, a new Astro component, `[page].astro`, and the sync script.
+6. **Adding new page types** requires a new variant in `pageTypes.ts` (rendering) and `excelSyncTypes.ts` (sync), a new component under `page-types/`, one entry in `pageTypeRegistry.ts`, and a new branch in `excelParser.ts`/`pageConfigCodegen.ts`. `[book]/[page].astro` and `Layout.astro` do not need to change.
 
 ## Sub-Agent
 
