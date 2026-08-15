@@ -17,6 +17,7 @@ import XLSX from 'xlsx';
 import { parseBookPages } from './excelParser.js';
 import { reorderPages } from './pageOrder.js';
 import { generatePageConfigSource } from './pageConfigCodegen.js';
+import { HOW_TO_PLAY_HTML } from './howToPlayContent.js';
 import type { PageConfig } from './excelSyncTypes.js';
 
 const OUT_PATH = path.join('src', 'utils', 'pageConfig.ts');
@@ -85,7 +86,17 @@ for (const book of BOOKS) {
   const { pages, warnings } = parseBookPages(rows.pagesRaw, rows.matchupRaw, book.id);
   totalWarnings += warnings;
 
-  const ordered = reorderPages(pages, book.id);
+  // Every book gets the same "How to Play" front-matter page, synthesized here
+  // rather than authored per-book in Excel. reorderPages() pins it directly
+  // after the toc page(s), so it lands as page 2 (page 1 if there's no toc yet).
+  const howToPlayPage: PageConfig = {
+    type: 'text',
+    title: 'How to Play',
+    content: HOW_TO_PLAY_HTML,
+    answerKeyUrl: `https://dykbtrivia.com/answers/${book.id}/2`,
+  };
+
+  const ordered = reorderPages([howToPlayPage, ...pages], book.id);
   bookResults.push({ id: book.id, pages: ordered });
   console.log(`✅  Generated ${ordered.length} pages for [${book.id}]`);
 }

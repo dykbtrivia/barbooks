@@ -57,28 +57,30 @@ function makeOrderComparator(order: string[]) {
 // promises: grouped by category, then subcategory within it, per
 // CATEGORY_ORDER/SUBCATEGORY_ORDER above. `toc` pages are pinned to the
 // front. `text`/`custom` pages aren't sorted independently — each stays
-// glued to its nearest neighboring content page (preceding if one exists,
-// otherwise the next one) and travels with it.
+// glued to its nearest neighboring content page (following, if it appears
+// before any content page in the sheet — front matter like a "How to Play"
+// page — otherwise the preceding one) and travels with it. Front-matter
+// text/custom pages are pinned directly after the toc pages rather than
+// glued to whichever category the next content page happens to sort into.
 //
 // Returns pages in final order, each with a correct final answerKeyUrl.
 export function reorderPages(pages: PageConfig[], bookId: string): PageConfig[] {
   const tocPages = pages.filter(p => p.type === 'toc');
   const rest = pages.filter(p => p.type !== 'toc');
 
-  interface Group { anchor: PageConfig; leaders: PageConfig[]; trailers: PageConfig[]; originalIndex: number; }
+  interface Group { anchor: PageConfig; trailers: PageConfig[]; originalIndex: number; }
   const groups: Group[] = [];
   let currentGroup: Group | null = null;
-  const pendingLeaders: PageConfig[] = [];
+  const pendingLeaders: PageConfig[] = []; // front matter: text/custom before any content page seen yet
 
   rest.forEach((page, idx) => {
     if (CONTENT_TYPES.has(page.type)) {
-      currentGroup = { anchor: page, leaders: [...pendingLeaders], trailers: [], originalIndex: idx };
-      pendingLeaders.length = 0;
+      currentGroup = { anchor: page, trailers: [], originalIndex: idx };
       groups.push(currentGroup);
     } else if (currentGroup) {
       currentGroup.trailers.push(page);
     } else {
-      pendingLeaders.push(page); // text/custom before any content page seen yet
+      pendingLeaders.push(page);
     }
   });
 
@@ -86,10 +88,6 @@ export function reorderPages(pages: PageConfig[], bookId: string): PageConfig[] 
   if (groups.length === 0) {
     ordered = [...tocPages, ...rest]; // no content pages — nothing to sort
   } else {
-    if (pendingLeaders.length > 0) {
-      groups[0].leaders = [...pendingLeaders, ...groups[0].leaders];
-    }
-
     const compareCategory = makeOrderComparator(CATEGORY_ORDER);
     const compareSubcategory = makeOrderComparator(SUBCATEGORY_ORDER);
 
@@ -109,12 +107,12 @@ export function reorderPages(pages: PageConfig[], bookId: string): PageConfig[] 
       return a.originalIndex - b.originalIndex; // stable fallback
     });
 
-    const orderedRest = groups.flatMap(g => [...g.leaders, g.anchor, ...g.trailers]);
-    ordered = [...tocPages, ...orderedRest];
+    const orderedRest = groups.flatMap(g => [g.anchor, ...g.trailers]);
+    ordered = [...tocPages, ...pendingLeaders, ...orderedRest];
   }
 
   return ordered.map((page, i) => ({
     ...page,
-    answerKeyUrl: `https://dykbtrivia.com/${bookId}/${i + 1}`,
+    answerKeyUrl: `https://dykbtrivia.com/answers/${bookId}/${i + 1}`,
   })) as PageConfig[];
 }

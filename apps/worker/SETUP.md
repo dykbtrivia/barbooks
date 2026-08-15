@@ -93,15 +93,11 @@ Test it at that URL — hitting `/dashboard` should return the dashboard page.
 
 ## Step 6 — Connect Your Domain
 
-This makes `your-domain.com/42` work instead of the `.workers.dev` URL.
+This makes `your-domain.com/answers/42` work instead of the `.workers.dev` URL.
 
-1. Go to [dash.cloudflare.com](https://dash.cloudflare.com)
-2. Open **Workers & Pages** → find `trivia-redirector`
-3. Go to **Settings → Triggers → Custom Domains**
-4. Click **Add Custom Domain** and enter your domain (e.g. `trivia.yourdomain.com`)
-5. Cloudflare automatically provisions a certificate and sets up DNS
+The worker is scoped to specific path prefixes (`/answers/*`, `/dashboard`, `/admin/*`) rather than the whole domain — that's a **Route**, not a **Custom Domain**. This matters if `your-domain.com` also serves a separate site (e.g. via GitHub Pages): a Custom Domain would claim the entire hostname for the worker and break the rest of the site, but a Route only intercepts the matching paths and lets everything else fall through to whatever the domain's DNS otherwise points to.
 
-Within a few minutes your domain is live and pointing at the worker.
+The `[[routes]]` entries in `wrangler.toml` already declare this — `wrangler deploy` (Step 8) provisions them automatically as long as the domain's zone is on your Cloudflare account. No dashboard steps needed for this part; just make sure the domain's DNS is proxied through Cloudflare (orange-cloud) so the routes can intercept requests.
 
 ---
 
@@ -120,7 +116,7 @@ curl -X PUT https://your-domain.com/admin/redirect/42 \
   -d '{"url": "https://en.wikipedia.org/wiki/NFL_MVP", "label": "NFL MVPs all time", "category": "NFL"}'
 ```
 
-Test it by visiting `https://your-domain.com/42` in your browser — it should redirect to the Wikipedia page.
+Test it by visiting `https://your-domain.com/answers/42` in your browser — it should redirect to the Wikipedia page.
 
 ---
 

@@ -108,7 +108,7 @@ export const pageTypeRegistry: Record<PageType, PageTypeRegistryEntry> = {
   text: {
     component: TextContent,
     getComponentProps: (page) => ({ content: (page as TextPageConfig).content }),
-    getHeaderProps: noHeaderProps,
+    getHeaderProps: (page) => ({ title: (page as TextPageConfig).title }),
     showsHeader: true,
     showsFooter: true,
   },

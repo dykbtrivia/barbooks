@@ -109,7 +109,7 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
     const columns    = Number(row.columns) || 1;
     // Provisional — pageOrder.reorderPages recomputes the real answerKeyUrl
     // from each page's final position.
-    const url        = `https://dykbtrivia.com/${bookId}/${pageNum}`;
+    const url        = `https://dykbtrivia.com/answers/${bookId}/${pageNum}`;
     const commonFields = extractCommonFields(row);
 
     if (type === 'list') {
@@ -141,6 +141,7 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
     } else if (type === 'text') {
       pages.push({
         type:         'text',
+        ...(title ? { title } : {}),
         content:      desc,
         answerKeyUrl: url,
       });
