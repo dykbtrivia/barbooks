@@ -26,6 +26,10 @@ export interface ListPage {
   items:         { clue: string | number }[];
   columns:       number;
   answerKeyUrl:  string;
+  /** The real destination URL from the Excel sheet, before it's overwritten
+   *  with the redirect URL. Only scripts/seed-kv.ts reads this — it's not
+   *  serialized into pageConfig.ts. */
+  realAnswerUrl?: string;
   actionContent?: ActionContent;
 }
 
@@ -44,6 +48,7 @@ export interface MatchupPage {
   items:         MatchupItem[];
   columns:       number;
   answerKeyUrl:  string;
+  realAnswerUrl?: string;
   actionContent?: ActionContent;
 }
 
@@ -68,6 +73,7 @@ export interface TeamsPage {
   subcategory?:  string;
   difficulty?:   PageDifficulty;
   answerKeyUrl:  string;
+  realAnswerUrl?: string;
   actionContent?: ActionContent;
 }
 
@@ -81,6 +87,7 @@ export interface BracketPage {
   /** Raw column G value passed straight through to the component */
   clueStyle:     string;
   answerKeyUrl:  string;
+  realAnswerUrl?: string;
   actionContent?: ActionContent;
 }
 

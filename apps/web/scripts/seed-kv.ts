@@ -1,8 +1,11 @@
 /**
  * seed-kv.ts
  *
- * Reads sport-specific Excel files and generates a JSON file
- * for bulk-uploading redirect entries to Cloudflare KV.
+ * Generates a JSON file for bulk-uploading redirect entries to Cloudflare
+ * KV, from the same final page order excelToJson.ts uses for pageConfig.ts
+ * (via buildOrderedPages() in buildBookPages.ts) — so KV keys always match
+ * the printed page numbers readers actually scan, not the Excel sheet's raw
+ * `pageNum` column.
  *
  * Usage:
  *   npx tsx scripts/seed-kv.ts
@@ -12,15 +15,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import XLSX from 'xlsx';
+
+import { BOOKS } from '../src/utils/excelSheetHeaders.js';
+import { buildOrderedPages } from '../src/utils/buildBookPages.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const BOOKS = [
-  { id: 'nfl', file: 'NFL Barbook Trivia.xlsx' },
-  { id: 'nba', file: 'NBA Barbook Trivia.xlsx' },
-];
 
 interface KVEntry {
   key: string;
@@ -30,45 +30,24 @@ interface KVEntry {
 const entries: KVEntry[] = [];
 
 for (const book of BOOKS) {
-  const excelPath = path.resolve(__dirname, '..', book.file);
-  if (!fs.existsSync(excelPath)) {
-    console.warn(`⚠️  Skipping ${book.id}: ${excelPath} not found`);
-    continue;
-  }
-
-  const workbook = XLSX.readFile(excelPath);
-  const sheet = workbook.Sheets['Pages'];
-  if (!sheet) {
-    console.warn(`⚠️  Skipping ${book.id}: no "Pages" sheet`);
-    continue;
-  }
-
-  const rows: any[] = XLSX.utils.sheet_to_json(sheet, {
-    header: ['pageNum', 'type', 'title', 'description', 'category', 'difficulty',
-             'itemsNote', 'columns', 'answerKeyUrl', 'actionNote', 'notePosition',
-             'noteRotation', 'noteIcon'],
-    range: 4,
-    defval: '',
-  });
+  const built = buildOrderedPages(book);
+  if (!built) continue;
 
   let count = 0;
-  for (const row of rows) {
-    const pageNum = Number(row.pageNum);
-    if (!pageNum) continue;
+  built.pages.forEach((page, i) => {
+    const finalPageNum = i + 1;
+    const realUrl = (page as { realAnswerUrl?: string }).realAnswerUrl;
+    if (!realUrl) return; // toc/text pages, or rows with no Excel answerKeyUrl
 
-    const url = String(row.answerKeyUrl).trim();
-    if (!url) continue;
+    const title = 'title' in page ? page.title ?? '' : '';
+    const category = ('category' in page && page.category) ? page.category : 'General';
 
-    const title = String(row.title).trim();
-    const category = String(row.category).trim() || 'General';
-
-    const key = `${book.id}:${pageNum}`;
     entries.push({
-      key,
-      value: JSON.stringify({ url, label: title, category }),
+      key: `${book.id}:${finalPageNum}`,
+      value: JSON.stringify({ url: realUrl, label: title, category }),
     });
     count++;
-  }
+  });
 
   console.log(`✅  ${book.id}: ${count} redirect entries`);
 }
