@@ -13,31 +13,29 @@ import '../styles/global.css';
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#f5e9d0] text-[#1a1a1a]" style="font-family: 'Inter', sans-serif;">
+<body class="bg-cream text-ink font-body">
 
   <!-- 1. Hero -->
-  <section class="relative overflow-hidden bg-[#1a1a1a] text-[#f5e9d0]">
+  <section class="relative overflow-hidden bg-ink text-cream">
     <div
       class="pointer-events-none absolute inset-0 opacity-[0.04]"
       style="background-image: repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 1px, transparent 12px);"
     ></div>
     <span
-      class="pointer-events-none absolute right-4 top-0 select-none text-[#f5e9d0] opacity-[0.15] leading-none"
-      style="font-family: 'Anton', sans-serif; font-size: clamp(120px, 22vw, 200px);"
+      class="pointer-events-none absolute right-4 top-0 select-none font-display text-cream opacity-[0.15] leading-none"
+      style="font-size: clamp(120px, 22vw, 200px);"
       aria-hidden="true"
     >?</span>
 
     <div class="relative max-w-[960px] mx-auto px-6 sm:px-10 pt-20 pb-24 sm:pt-24 sm:pb-28">
-      <p
-        class="uppercase text-[#c8102e] mb-6"
-        style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.5em;"
-      >Pro Football Edition</p>
-      <h1
-        class="mb-6"
-        style="font-family: 'Anton', sans-serif; font-size: clamp(48px, 9vw, 96px); line-height: 0.88;"
-      >(DYKB) TRIVIA</h1>
-      <div class="bg-[#c8102e] mb-6" style="width: 80px; height: 4px;"></div>
-      <p class="max-w-[480px] text-[#ebd9b4]" style="font-size: 18px;">
+      <p class="font-mono uppercase text-red mb-6" style="font-size: 13px; letter-spacing: 0.5em;">
+        Pro Football Edition
+      </p>
+      <h1 class="font-display mb-6" style="font-size: clamp(48px, 9vw, 96px); line-height: 0.88;">
+        (DYKB) TRIVIA
+      </h1>
+      <div class="bg-red mb-6" style="width: 80px; height: 4px;"></div>
+      <p class="max-w-[480px] text-cream-dark" style="font-size: 18px;">
         Not your typical trivia night. No single-answer gotcha questions — every challenge is a list you fill
         out, debate, and argue over. Grab the book, grab a friend, and see who really knows ball.
       </p>
@@ -45,22 +43,22 @@ import '../styles/global.css';
   </section>
 
   <!-- 2. Selling Points Banner -->
-  <section class="bg-[#c8102e] text-white">
+  <section class="bg-red text-cream">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-12 grid gap-10 sm:grid-cols-3 text-center">
       <div>
-        <h3 class="mb-2" style="font-family: 'Anton', sans-serif; font-size: 20px;">IN-PERSON FUN</h3>
+        <h3 class="font-display mb-2" style="font-size: 20px;">IN-PERSON FUN</h3>
         <p class="opacity-85" style="font-size: 14px;">
           Put down the phone. This is face-to-face, pen-in-hand trivia you can play anywhere.
         </p>
       </div>
       <div>
-        <h3 class="mb-2" style="font-family: 'Anton', sans-serif; font-size: 20px;">MORE THAN ONE ANSWER</h3>
+        <h3 class="font-display mb-2" style="font-size: 20px;">MORE THAN ONE ANSWER</h3>
         <p class="opacity-85" style="font-size: 14px;">
           Lists, matchups, and brackets — not just "who did it first?" Every question is a conversation.
         </p>
       </div>
       <div>
-        <h3 class="mb-2" style="font-family: 'Anton', sans-serif; font-size: 20px;">ALWAYS CURRENT</h3>
+        <h3 class="font-display mb-2" style="font-size: 20px;">ALWAYS CURRENT</h3>
         <p class="opacity-85" style="font-size: 14px;">
           Scan the QR code for answer keys that update with every roster move and record broken.
         </p>
@@ -69,58 +67,54 @@ import '../styles/global.css';
   </section>
 
   <!-- 3. How to Play — 3 Steps -->
-  <section class="bg-[#f5e9d0]">
+  <section class="bg-cream">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20">
-      <p
-        class="uppercase text-[#c8102e] mb-3"
-        style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.4em;"
-      >The Playbook</p>
-      <h2 class="mb-3" style="font-family: 'Anton', sans-serif; font-size: 44px;">HOW TO PLAY</h2>
-      <p class="text-[#555] mb-12" style="font-size: 15px;">
+      <p class="font-mono uppercase text-red mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
+        The Playbook
+      </p>
+      <h2 class="font-display mb-3" style="font-size: 44px;">HOW TO PLAY</h2>
+      <p class="text-mid mb-12" style="font-size: 15px;">
         Everything you need to get started — three steps and you're in.
       </p>
 
       <div class="flex flex-col md:flex-row gap-10 md:gap-8">
         <div class="relative flex-1">
-          <div class="hidden md:block absolute top-7 left-14 right-0 h-[2px] bg-[#1a1a1a] opacity-[0.15]" aria-hidden="true"></div>
+          <div class="hidden md:block absolute top-7 left-14 right-0 h-[2px] bg-ink opacity-[0.15]" aria-hidden="true"></div>
           <div
-            class="relative flex items-center justify-center bg-[#1a1a1a] text-[#f5e9d0] mb-5"
-            style="width: 56px; height: 56px; font-family: 'Anton', sans-serif; font-size: 28px;"
+            class="relative flex items-center justify-center bg-ink text-cream font-display mb-5"
+            style="width: 56px; height: 56px; font-size: 28px;"
           >01</div>
-          <h3
-            class="uppercase mb-2"
-            style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 0.15em;"
-          >Pick Your Challenge</h3>
-          <p class="text-[#555]" style="font-size: 15px;">
+          <h3 class="font-mono uppercase mb-2" style="font-weight: 700; font-size: 13px; letter-spacing: 0.15em;">
+            Pick Your Challenge
+          </h3>
+          <p class="text-mid" style="font-size: 15px;">
             Each page has a category, difficulty level, and a set of questions ready to go. Flip to whatever
             catches your eye.
           </p>
         </div>
         <div class="relative flex-1">
-          <div class="hidden md:block absolute top-7 left-14 right-0 h-[2px] bg-[#1a1a1a] opacity-[0.15]" aria-hidden="true"></div>
+          <div class="hidden md:block absolute top-7 left-14 right-0 h-[2px] bg-ink opacity-[0.15]" aria-hidden="true"></div>
           <div
-            class="relative flex items-center justify-center bg-[#1a1a1a] text-[#f5e9d0] mb-5"
-            style="width: 56px; height: 56px; font-family: 'Anton', sans-serif; font-size: 28px;"
+            class="relative flex items-center justify-center bg-ink text-cream font-display mb-5"
+            style="width: 56px; height: 56px; font-size: 28px;"
           >02</div>
-          <h3
-            class="uppercase mb-2"
-            style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 0.15em;"
-          >Answer Up</h3>
-          <p class="text-[#555]" style="font-size: 15px;">
+          <h3 class="font-mono uppercase mb-2" style="font-weight: 700; font-size: 13px; letter-spacing: 0.15em;">
+            Answer Up
+          </h3>
+          <p class="text-mid" style="font-size: 15px;">
             Write your guesses on the lines provided — or just keep them in your head. No peeking until you're
             done.
           </p>
         </div>
         <div class="relative flex-1">
           <div
-            class="flex items-center justify-center bg-[#1a1a1a] text-[#f5e9d0] mb-5"
-            style="width: 56px; height: 56px; font-family: 'Anton', sans-serif; font-size: 28px;"
+            class="flex items-center justify-center bg-ink text-cream font-display mb-5"
+            style="width: 56px; height: 56px; font-size: 28px;"
           >03</div>
-          <h3
-            class="uppercase mb-2"
-            style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 0.15em;"
-          >Scan &amp; Score</h3>
-          <p class="text-[#555]" style="font-size: 15px;">
+          <h3 class="font-mono uppercase mb-2" style="font-weight: 700; font-size: 13px; letter-spacing: 0.15em;">
+            Scan &amp; Score
+          </h3>
+          <p class="text-mid" style="font-size: 15px;">
             Point your phone at the QR code. The answer key loads instantly. Check your work and tally your
             score.
           </p>
@@ -130,31 +124,30 @@ import '../styles/global.css';
   </section>
 
   <!-- 4. Always Up to Date -->
-  <section class="bg-[#1a1a1a] text-[#f5e9d0]">
+  <section class="bg-ink text-cream">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20 flex flex-col md:flex-row items-center gap-12 md:gap-[60px]">
       <svg width="160" height="160" viewBox="0 0 160 160" fill="none" class="flex-shrink-0" aria-hidden="true">
-        <rect x="40" y="8" width="80" height="144" rx="12" stroke="#ebd9b4" stroke-width="2.5" fill="none"/>
-        <rect x="56" y="28" width="48" height="48" fill="#f5e9d0" opacity="0.08"/>
-        <rect x="62" y="34" width="8" height="8" fill="#ebd9b4"/>
-        <rect x="90" y="34" width="8" height="8" fill="#ebd9b4"/>
-        <rect x="62" y="62" width="8" height="8" fill="#ebd9b4"/>
-        <rect x="76" y="48" width="8" height="8" fill="#ebd9b4"/>
-        <rect x="90" y="62" width="8" height="8" fill="#ebd9b4"/>
-        <path d="M52 20 L44 20 L44 28" stroke="#c8102e" stroke-width="2.5" fill="none"/>
-        <path d="M108 20 L116 20 L116 28" stroke="#c8102e" stroke-width="2.5" fill="none"/>
-        <path d="M52 84 L44 84 L44 76" stroke="#c8102e" stroke-width="2.5" fill="none"/>
-        <path d="M108 84 L116 84 L116 76" stroke="#c8102e" stroke-width="2.5" fill="none"/>
-        <line x1="46" y1="52" x2="110" y2="52" stroke="#c8102e" stroke-width="1.5" opacity="0.7"/>
-        <circle cx="126" cy="120" r="20" fill="#c8102e"/>
-        <path d="M117 120 L123 127 L136 112" stroke="#f5e9d0" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="40" y="8" width="80" height="144" rx="12" stroke="var(--color-cream-dark)" stroke-width="2.5" fill="none"/>
+        <rect x="56" y="28" width="48" height="48" fill="var(--color-cream)" opacity="0.08"/>
+        <rect x="62" y="34" width="8" height="8" fill="var(--color-cream-dark)"/>
+        <rect x="90" y="34" width="8" height="8" fill="var(--color-cream-dark)"/>
+        <rect x="62" y="62" width="8" height="8" fill="var(--color-cream-dark)"/>
+        <rect x="76" y="48" width="8" height="8" fill="var(--color-cream-dark)"/>
+        <rect x="90" y="62" width="8" height="8" fill="var(--color-cream-dark)"/>
+        <path d="M52 20 L44 20 L44 28" stroke="var(--color-red)" stroke-width="2.5" fill="none"/>
+        <path d="M108 20 L116 20 L116 28" stroke="var(--color-red)" stroke-width="2.5" fill="none"/>
+        <path d="M52 84 L44 84 L44 76" stroke="var(--color-red)" stroke-width="2.5" fill="none"/>
+        <path d="M108 84 L116 84 L116 76" stroke="var(--color-red)" stroke-width="2.5" fill="none"/>
+        <line x1="46" y1="52" x2="110" y2="52" stroke="var(--color-red)" stroke-width="1.5" opacity="0.7"/>
+        <circle cx="126" cy="120" r="20" fill="var(--color-red)"/>
+        <path d="M117 120 L123 127 L136 112" stroke="var(--color-cream)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <div>
-        <p
-          class="uppercase text-[#c8102e] mb-3"
-          style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.4em;"
-        >Always Up to Date</p>
-        <h2 class="mb-4" style="font-family: 'Anton', sans-serif; font-size: 36px;">ANSWERS THAT STAY CURRENT</h2>
-        <p class="text-[#ebd9b4] max-w-[520px]" style="font-size: 17px;">
+        <p class="font-mono uppercase text-red mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
+          Always Up to Date
+        </p>
+        <h2 class="font-display mb-4" style="font-size: 36px;">ANSWERS THAT STAY CURRENT</h2>
+        <p class="text-cream-dark max-w-[520px]" style="font-size: 17px;">
           Answer keys live online, so they're never out of date. Rosters change, records break, stats update —
           your answers stay current. Just scan and check.
         </p>
@@ -163,63 +156,62 @@ import '../styles/global.css';
   </section>
 
   <!-- 5. Play Your Way -->
-  <section class="bg-[#f5e9d0]">
+  <section class="bg-cream">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20">
-      <p
-        class="uppercase text-[#c8102e] mb-3"
-        style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.4em;"
-      >Play Your Way</p>
-      <h2 class="mb-10" style="font-family: 'Anton', sans-serif; font-size: 44px;">SOLO OR WITH FRIENDS</h2>
+      <p class="font-mono uppercase text-red mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
+        Play Your Way
+      </p>
+      <h2 class="font-display mb-10" style="font-size: 44px;">SOLO OR WITH FRIENDS</h2>
 
       <div class="flex flex-col md:flex-row gap-8">
         <!-- Solo card -->
-        <div class="flex-1 border-[2.5px] border-[#1a1a1a] px-8 py-9">
+        <div class="flex-1 border-ink px-8 py-9" style="border-width: 2.5px;">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none" class="mb-5" aria-hidden="true">
-            <circle cx="16" cy="16" r="12" stroke="#1a1a1a" stroke-width="2.5"/>
+            <circle cx="16" cy="16" r="12" stroke="var(--color-ink)" stroke-width="2.5"/>
           </svg>
-          <h3 class="mb-3" style="font-family: 'Anton', sans-serif; font-size: 32px;">SOLO</h3>
-          <p class="text-[#555] mb-5" style="font-size: 15px;">
+          <h3 class="font-display mb-3" style="font-size: 32px;">SOLO</h3>
+          <p class="text-mid mb-5" style="font-size: 15px;">
             Fill in your answers, scan the QR code to check, and keep a running score. Try to beat your best
             next time around.
           </p>
           <ul class="space-y-2">
             <li class="flex items-center gap-3" style="font-size: 14px;">
-              <span class="bg-[#c8102e] flex-shrink-0" style="width: 6px; height: 6px;"></span>
+              <span class="bg-red flex-shrink-0" style="width: 6px; height: 6px;"></span>
               Write answers in the book
             </li>
             <li class="flex items-center gap-3" style="font-size: 14px;">
-              <span class="bg-[#c8102e] flex-shrink-0" style="width: 6px; height: 6px;"></span>
+              <span class="bg-red flex-shrink-0" style="width: 6px; height: 6px;"></span>
               Scan QR to check
             </li>
             <li class="flex items-center gap-3" style="font-size: 14px;">
-              <span class="bg-[#c8102e] flex-shrink-0" style="width: 6px; height: 6px;"></span>
+              <span class="bg-red flex-shrink-0" style="width: 6px; height: 6px;"></span>
               Track your score over time
             </li>
           </ul>
         </div>
 
         <!-- With a Friend card -->
-        <div class="flex-1 bg-[#1a1a1a] text-[#f5e9d0] px-8 py-9">
+        <div class="flex-1 bg-ink text-cream px-8 py-9">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none" class="mb-5" aria-hidden="true">
-            <line x1="8" y1="8" x2="24" y2="24" stroke="#f5e9d0" stroke-width="2.5" stroke-linecap="round"/>
-            <line x1="24" y1="8" x2="8" y2="24" stroke="#f5e9d0" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="8" y1="8" x2="24" y2="24" stroke="var(--color-cream)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="24" y1="8" x2="8" y2="24" stroke="var(--color-cream)" stroke-width="2.5" stroke-linecap="round"/>
           </svg>
-          <h3 class="mb-3" style="font-family: 'Anton', sans-serif; font-size: 32px;">WITH A FRIEND</h3>
-          <p class="text-[#ebd9b4] mb-5" style="font-size: 15px;">
+          <h3 class="font-display mb-3" style="font-size: 32px;">WITH A FRIEND</h3>
+          <p class="text-cream-dark mb-5" style="font-size: 15px;">
             One person scans the QR code and holds the answers. Read the questions aloud, give hints if
             they're stuck, and keep score.
           </p>
           <ul class="space-y-2">
             <li class="flex items-center gap-3" style="font-size: 14px;">
-              <span class="bg-[#c8102e] flex-shrink-0" style="width: 6px; height: 6px;"></span>
+              <span class="bg-red flex-shrink-0" style="width: 6px; height: 6px;"></span>
               One person holds the answers
             </li>
             <li class="flex items-center gap-3" style="font-size: 14px;">
-              <span class="bg-[#c8102e] flex-shrink-0" style="width: 6px; height: 6px;"></span>
+              <span class="bg-red flex-shrink-0" style="width: 6px; height: 6px;"></span>
               Read questions aloud
             </li>
             <li class="flex items-center gap-3" style="font-size: 14px;">
-              <span class="bg-[#c8102e] flex-shrink-0" style="width: 6px; height: 6px;"></span>
+              <span class="bg-red flex-shrink-0" style="width: 6px; height: 6px;"></span>
               Give hints if they're stuck
             </li>
           </ul>
@@ -229,29 +221,28 @@ import '../styles/global.css';
   </section>
 
   <!-- 6. Spice It Up -->
-  <section class="bg-[#c8102e] text-white">
+  <section class="bg-red text-cream">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20">
-      <p
-        class="uppercase opacity-70 mb-3"
-        style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.4em;"
-      >Make It Interesting</p>
-      <h2 class="mb-12" style="font-family: 'Anton', sans-serif; font-size: 52px;">SPICE IT UP</h2>
+      <p class="font-mono uppercase opacity-70 mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
+        Make It Interesting
+      </p>
+      <h2 class="font-display mb-12" style="font-size: 52px;">SPICE IT UP</h2>
 
       <div class="flex flex-col md:flex-row gap-7">
         <div class="flex-1 px-7 py-8" style="background: rgba(0,0,0,0.2);">
-          <h3 class="mb-3" style="font-family: 'Anton', sans-serif; font-size: 28px;">SET A TIMER</h3>
+          <h3 class="font-display mb-3" style="font-size: 28px;">SET A TIMER</h3>
           <p class="opacity-85" style="font-size: 15px;">
             30 seconds per answer, or give yourself 5 minutes for the whole page. Pressure makes it fun.
           </p>
         </div>
         <div class="flex-1 px-7 py-8" style="background: rgba(0,0,0,0.2);">
-          <h3 class="mb-3" style="font-family: 'Anton', sans-serif; font-size: 28px;">BET THE ROUND</h3>
+          <h3 class="font-display mb-3" style="font-size: 28px;">BET THE ROUND</h3>
           <p class="opacity-85" style="font-size: 15px;">
             Loser buys the next round of drinks. Simple stakes, maximum motivation.
           </p>
         </div>
         <div class="flex-1 px-7 py-8" style="background: rgba(0,0,0,0.2);">
-          <h3 class="mb-3" style="font-family: 'Anton', sans-serif; font-size: 28px;">SET A LINE</h3>
+          <h3 class="font-display mb-3" style="font-size: 28px;">SET A LINE</h3>
           <p class="opacity-85" style="font-size: 15px;">
             Call your number before you start: "I'm hitting 18 out of 25." Over or under?
           </p>
@@ -261,25 +252,21 @@ import '../styles/global.css';
   </section>
 
   <!-- 7. CTA Footer -->
-  <section class="bg-[#1a1a1a] text-[#f5e9d0]">
+  <section class="bg-ink text-cream">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 text-center flex flex-col items-center">
-      <h2 class="mb-4" style="font-family: 'Anton', sans-serif; font-size: 48px;">READY TO PLAY?</h2>
-      <p class="text-[#ebd9b4] max-w-[480px] mb-8" style="font-size: 17px;">
+      <h2 class="font-display mb-4" style="font-size: 48px;">READY TO PLAY?</h2>
+      <p class="text-cream-dark max-w-[480px] mb-8" style="font-size: 17px;">
         Pick up your copy of Do You Know Ball? and put your pro football knowledge to the test.
       </p>
       <div class="flex flex-col sm:flex-row gap-4 mb-10">
-        <a
-          href="#"
-          class="bg-[#c8102e] text-white px-10 py-4"
-          style="font-family: 'Anton', sans-serif; font-size: 20px;"
-        >GET THE BOOK</a>
-        <a
-          href="#how-to-play"
-          class="border border-[#f5e9d0] text-[#f5e9d0] px-10 py-4"
-          style="font-family: 'Anton', sans-serif; font-size: 20px;"
-        >LEARN MORE</a>
+        <a href="#" class="bg-red hover:bg-red-dark text-cream font-display px-10 py-4" style="font-size: 20px;">
+          GET THE BOOK
+        </a>
+        <a href="#how-to-play" class="border border-cream text-cream font-display px-10 py-4" style="font-size: 20px;">
+          LEARN MORE
+        </a>
       </div>
-      <p class="opacity-50" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px;">
+      <p class="font-mono opacity-50" style="font-size: 12px;">
         (DYKB) TRIVIA · Pro Football Edition
       </p>
     </div>

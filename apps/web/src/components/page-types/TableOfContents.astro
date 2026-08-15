@@ -64,15 +64,15 @@ const editionLabel = edition ?? `${bookId.toUpperCase()} · Vol. I`;
   }
 
   .toc-stripe {
-    background: #111;
-    color: #fff;
+    background: #1a1a1a;
+    color: #f5e9d0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 0.75in;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px;
-    letter-spacing: 0.1em;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
@@ -81,18 +81,21 @@ const editionLabel = edition ?? `${bookId.toUpperCase()} · Vol. I`;
   .toc-stripe-bottom {
     justify-content: center;
     margin-top: auto;
+    color: #c8102e;
   }
 
   .toc-title-block {
     padding: 24px 0.75in 12px;
-    border-bottom: 2px solid #111;
+    border-bottom: 2.5px solid #1a1a1a;
   }
 
   .toc-title-block h1 {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    font-weight: 400;
     font-size: 36px;
-    letter-spacing: 0.05em;
-    color: #111;
+    letter-spacing: 0.015em;
+    color: #1a1a1a;
     margin: 0;
   }
 
@@ -121,17 +124,18 @@ const editionLabel = edition ?? `${bookId.toUpperCase()} · Vol. I`;
   }
 
   .toc-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 17px;
-    letter-spacing: 0.06em;
+    font-family: 'Anton', sans-serif;
     text-transform: uppercase;
-    color: #111;
+    font-weight: 400;
+    font-size: 17px;
+    letter-spacing: 0.01em;
+    color: #1a1a1a;
     white-space: nowrap;
   }
 
   .toc-leader {
     flex: 1;
-    border-bottom: 1.5px solid #111;
+    border-bottom: 1.5px solid #1a1a1a;
     margin-bottom: 4px;
   }
 
@@ -139,7 +143,15 @@ const editionLabel = edition ?? `${bookId.toUpperCase()} · Vol. I`;
     font-family: 'IBM Plex Mono', monospace;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: #111;
+    color: #c8102e;
     font-size: 14px;
+  }
+
+  /* Print stays black/grayscale only — no red accent. */
+  @media print {
+    .toc-stripe-bottom,
+    .toc-page-num {
+      color: #1a1a1a;
+    }
   }
 </style>
