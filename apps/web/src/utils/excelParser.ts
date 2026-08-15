@@ -110,6 +110,10 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
     // Provisional — pageOrder.reorderPages recomputes the real answerKeyUrl
     // from each page's final position.
     const url        = `https://dykbtrivia.com/answers/${bookId}/${pageNum}`;
+    // The real destination (e.g. a pro-football-reference page) — kept
+    // separate from `url` above, which is the redirect URL that goes into
+    // pageConfig.ts. Only scripts/seed-kv.ts reads this field.
+    const realAnswerUrl = String(row.answerKeyUrl ?? '').trim() || undefined;
     const commonFields = extractCommonFields(row);
 
     if (type === 'list') {
@@ -122,6 +126,7 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
         items:        parseItemsNote(itemsNote),
         columns,
         answerKeyUrl: url,
+        ...(realAnswerUrl ? { realAnswerUrl } : {}),
       });
     } else if (type === 'matchup') {
       const items = matchupsByPage.get(pageNum) ?? [];
@@ -137,6 +142,7 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
         items,
         columns,
         answerKeyUrl: url,
+        ...(realAnswerUrl ? { realAnswerUrl } : {}),
       });
     } else if (type === 'text') {
       pages.push({
@@ -158,6 +164,7 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
         description:  desc,
         ...commonFields,
         answerKeyUrl: url,
+        ...(realAnswerUrl ? { realAnswerUrl } : {}),
       });
     } else if (type === 'bracket') {
       const clueStyle = String(row.itemsNote ?? '').trim();
@@ -172,6 +179,7 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
         ...commonFields,
         clueStyle,
         answerKeyUrl: url,
+        ...(realAnswerUrl ? { realAnswerUrl } : {}),
       });
     } else {
       console.warn(`  ⚠️  [${bookId}] Page ${pageNum} has unknown type "${type}".`);
