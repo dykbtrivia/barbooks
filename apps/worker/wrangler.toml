@@ -2,6 +2,23 @@ name = "trivia-redirector"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
 
+# Scoped to just the paths this worker owns — everything else on
+# dykbtrivia.com (marketing site, book reader) is served by the actual site,
+# not this worker. NOTE: this only adds these routes; it does NOT remove
+# whatever route/custom-domain currently binds the whole zone to this worker
+# in the Cloudflare dashboard — that needs to be deleted manually there.
+[[routes]]
+pattern = "dykbtrivia.com/answers/*"
+zone_name = "dykbtrivia.com"
+
+[[routes]]
+pattern = "dykbtrivia.com/dashboard"
+zone_name = "dykbtrivia.com"
+
+[[routes]]
+pattern = "dykbtrivia.com/admin/*"
+zone_name = "dykbtrivia.com"
+
 [[kv_namespaces]]
 binding = "REDIRECTS"
 id = "8d9e8560388f4140a6819922931f5a48"

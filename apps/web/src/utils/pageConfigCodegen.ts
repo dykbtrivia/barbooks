@@ -80,6 +80,7 @@ export function serializePage(page: PageConfig): string {
 
   if (page.type === 'text') {
     lines.push(`  type: 'text',`);
+    if (page.title) lines.push(`  title: ${JSON.stringify(page.title)},`);
     lines.push(`  content: ${JSON.stringify(page.content)},`);
     lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)}`);
   } else if (page.type === 'toc') {

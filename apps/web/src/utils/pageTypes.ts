@@ -45,6 +45,7 @@ export interface ListPageConfig {
 
 export interface TextPageConfig {
   type: 'text';
+  title?: string;
   content: string;
   answerKeyUrl?: string;
   actionContent?: ActionContent;

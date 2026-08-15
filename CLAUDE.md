@@ -20,9 +20,9 @@ Question pages do **not** include printed answers. Each page has an `answerKeyUr
 
 ### Answer key redirect flow
 
-QR codes in the book point to **`https://dykbtrivia.com/{book}/{pageNum}`** (e.g., `dykbtrivia.com/nfl/1`). A Cloudflare Worker at that domain looks up the page number in KV and redirects to the real answer key URL (e.g., a pro-football-reference page).
+QR codes in the book point to **`https://dykbtrivia.com/answers/{book}/{pageNum}`** (e.g., `dykbtrivia.com/answers/nfl/1`). A Cloudflare Worker, scoped to just the `/answers/*` path on that domain (see `apps/worker/wrangler.toml`'s `routes`), looks up the page number in KV and redirects to the real answer key URL (e.g., a pro-football-reference page). Everything else on `dykbtrivia.com` — the marketing site, the book reader — is served by the actual site, not this worker, since the `/answers/` prefix keeps the two from ever colliding on the same URL.
 
-**The Excel `answerKeyUrl` column stores the real destination URLs for human reference only.** The sync script (`excelToJson.ts`) does **not** copy these URLs into `pageConfig.ts` — instead it generates redirect URLs (`https://dykbtrivia.com/{book}/{pageNum}`) so the QR codes always go through the worker.
+**The Excel `answerKeyUrl` column stores the real destination URLs for human reference only.** The sync script (`excelToJson.ts`) does **not** copy these URLs into `pageConfig.ts` — instead it generates redirect URLs (`https://dykbtrivia.com/answers/{book}/{pageNum}`) so the QR codes always go through the worker.
 
 To populate/update the worker's KV store with the real URLs from Excel, run:
 ```sh

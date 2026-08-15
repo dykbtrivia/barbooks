@@ -49,6 +49,7 @@ export interface MatchupPage {
 
 export interface TextPage {
   type:          'text';
+  title?:        string;
   content:       string;
   answerKeyUrl:  string;
 }

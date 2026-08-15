@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://dev.dykbtrivia.com',
+  site: 'https://dykbtrivia.com',
   output: 'static',
   build: {
     assets: 'assets'
