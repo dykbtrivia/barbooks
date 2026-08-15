@@ -7,23 +7,23 @@ interface Props {
 const { currentPage = 1, totalPages = 100 } = Astro.props as Props;
 ---
 
-<footer class="bg-gray-800 text-white mt-auto print:hidden">
+<footer class="bg-ink text-cream mt-auto print:hidden">
   <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center">
-      <p>&copy; 2024 Book Reader. All rights reserved.</p>
+      <p class="font-mono text-xs uppercase tracking-widest text-cream-dark">&copy; 2024 Do You Know Ball?</p>
 
       <!-- Center section for QR code (added by JS) and page number -->
       <div id="footer-center" class="flex items-center space-x-4">
-        <span class="text-gray-300 text-sm">Page {currentPage}</span>
+        <span class="text-cream-dark text-sm font-mono">Page {currentPage}</span>
       </div>
 
       <div class="flex space-x-2">
         <button
           id="prev-btn"
-          class={`px-4 py-2 rounded transition-colors duration-200 ${
+          class={`px-4 py-2 font-display text-sm uppercase tracking-wide transition-colors duration-200 ${
             currentPage <= 1
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
+              ? 'bg-ink-soft text-light cursor-not-allowed'
+              : 'bg-red hover:bg-red-dark text-cream'
           }`}
           disabled={currentPage <= 1}
         >
@@ -31,10 +31,10 @@ const { currentPage = 1, totalPages = 100 } = Astro.props as Props;
         </button>
         <button
           id="next-btn"
-          class={`px-4 py-2 rounded transition-colors duration-200 ${
+          class={`px-4 py-2 font-display text-sm uppercase tracking-wide transition-colors duration-200 ${
             currentPage >= totalPages
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
+              ? 'bg-ink-soft text-light cursor-not-allowed'
+              : 'bg-red hover:bg-red-dark text-cream'
           }`}
           disabled={currentPage >= totalPages}
         >

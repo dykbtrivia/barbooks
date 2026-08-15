@@ -20,101 +20,105 @@ const books = [
   <meta name="description" content="Do You Know Ball? is a collaborative sports trivia book series — no app, no host, just open to a page and start playing. NFL Vol. I out now, NBA coming soon.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@300;400;700;900&family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-white text-gray-900">
+<body class="bg-cream text-ink font-body">
 
   <!-- Nav -->
-  <header class="bg-[#111] text-white">
+  <header class="bg-ink text-cream">
     <div class="container mx-auto px-6 py-4">
-      <a href="/" class="font-bold tracking-wide" style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.08em;">
-        DO YOU KNOW BALL?
+      <a href="/" class="font-display uppercase tracking-wide text-xl">
+        (DYKB) TRIVIA
       </a>
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="bg-[#111] text-white">
+  <!-- Hero (dark) -->
+  <section class="bg-ink text-cream">
     <div class="container mx-auto px-6 pt-10 pb-20 max-w-3xl">
-      <p class="uppercase text-orange-400 font-semibold tracking-widest text-xs mb-4" style="font-family: 'IBM Plex Mono', monospace;">
+      <p class="uppercase text-red font-mono font-semibold tracking-[0.4em] text-xs mb-4">
         Print-on-Demand Trivia · No App Required
       </p>
-      <h1 class="text-5xl sm:text-6xl leading-none mb-6" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em;">
+      <h1 class="font-display uppercase text-5xl sm:text-6xl leading-[0.9] mb-6 tracking-wide">
         Do you actually know ball, or do you just watch it?
       </h1>
-      <p class="text-lg text-gray-300 mb-8 max-w-xl">
-        <strong class="text-white">Do You Know Ball?</strong> is a collaborative trivia book built for tailgates, bars, road trips, and living rooms.
+      <div class="w-20 h-1 bg-red mb-6"></div>
+      <p class="text-lg text-cream-dark mb-8 max-w-xl leading-relaxed">
+        <strong class="text-cream">Do You Know Ball?</strong> is a collaborative trivia book built for tailgates, bars, road trips, and living rooms.
         No app, no host, no setup — just open to a page and start arguing about who's really the best.
       </p>
-      <p class="uppercase text-gray-400 font-semibold tracking-widest text-xs" style="font-family: 'IBM Plex Mono', monospace;">
+      <p class="uppercase text-cream-dark/70 font-mono font-semibold tracking-widest text-xs">
         In development — check back soon
       </p>
     </div>
   </section>
 
-  <!-- What it is -->
+  <!-- What it is (cream) -->
   <section class="container mx-auto px-6 py-16 max-w-3xl">
-    <h2 class="text-3xl mb-4" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em;">What's in the book?</h2>
-    <p class="text-gray-700 leading-relaxed mb-4">
+    <p class="uppercase text-mid font-mono font-semibold tracking-[0.4em] text-xs mb-2">The Book</p>
+    <h2 class="font-display uppercase text-3xl mb-4 tracking-wide">What's in the book?</h2>
+    <p class="text-mid leading-relaxed mb-4 max-w-[520px]">
       Every page is its own trivia challenge — name the last 20 NFL MVPs, fill in a playoff bracket from memory,
       match final scores to their Super Bowl. Some pages are quick, some will start fights. All of them are
       built to be worked through together, out loud, with real people.
     </p>
-    <p class="text-gray-700 leading-relaxed">
+    <p class="text-mid leading-relaxed max-w-[520px]">
       Answers aren't printed on the page — each one has a QR code in the footer that pulls up the answer key
       instantly, so no one can sneak a peek before the group is done.
     </p>
   </section>
 
-  <!-- How it works -->
-  <section class="bg-gray-50 border-y border-gray-200">
+  <!-- How it works (white cards on cream) -->
+  <section class="bg-white border-y-2 border-ink">
     <div class="container mx-auto px-6 py-16 max-w-3xl">
-      <h2 class="text-3xl mb-8" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em;">How it works</h2>
+      <p class="uppercase text-mid font-mono font-semibold tracking-[0.4em] text-xs mb-2">The Playbook</p>
+      <h2 class="font-display uppercase text-3xl mb-8 tracking-wide">How it works</h2>
       <div class="grid sm:grid-cols-3 gap-8">
         <div>
-          <div class="text-orange-500 font-bold text-2xl mb-2" style="font-family: 'IBM Plex Mono', monospace;">01</div>
-          <h3 class="font-bold mb-1">Open to a page</h3>
-          <p class="text-gray-600 text-sm">Any page, any order. Each one's a self-contained challenge, ranked Easy to Hard.</p>
+          <div class="flex items-center justify-center w-14 h-14 bg-ink text-cream font-display text-2xl mb-3">01</div>
+          <h3 class="font-mono font-bold uppercase tracking-wide text-sm mb-1">Open to a page</h3>
+          <p class="text-mid text-sm leading-relaxed">Any page, any order. Each one's a self-contained challenge, ranked Easy to Hard.</p>
         </div>
         <div>
-          <div class="text-orange-500 font-bold text-2xl mb-2" style="font-family: 'IBM Plex Mono', monospace;">02</div>
-          <h3 class="font-bold mb-1">Play it out loud</h3>
-          <p class="text-gray-600 text-sm">Read the prompt, fill in the blanks together, and see how far memory (and ego) gets you.</p>
+          <div class="flex items-center justify-center w-14 h-14 bg-ink text-cream font-display text-2xl mb-3">02</div>
+          <h3 class="font-mono font-bold uppercase tracking-wide text-sm mb-1">Play it out loud</h3>
+          <p class="text-mid text-sm leading-relaxed">Read the prompt, fill in the blanks together, and see how far memory (and ego) gets you.</p>
         </div>
         <div>
-          <div class="text-orange-500 font-bold text-2xl mb-2" style="font-family: 'IBM Plex Mono', monospace;">03</div>
-          <h3 class="font-bold mb-1">Scan to check</h3>
-          <p class="text-gray-600 text-sm">Every page's QR code reveals the real answer key — no spoilers until you're ready.</p>
+          <div class="flex items-center justify-center w-14 h-14 bg-ink text-cream font-display text-2xl mb-3">03</div>
+          <h3 class="font-mono font-bold uppercase tracking-wide text-sm mb-1">Scan to check</h3>
+          <p class="text-mid text-sm leading-relaxed">Every page's QR code reveals the real answer key — no spoilers until you're ready.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Library -->
+  <!-- Library (cream) -->
   <section class="container mx-auto px-6 py-16 max-w-3xl">
-    <h2 class="text-3xl mb-8" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em;">The library</h2>
+    <p class="uppercase text-mid font-mono font-semibold tracking-[0.4em] text-xs mb-2">Volumes</p>
+    <h2 class="font-display uppercase text-3xl mb-8 tracking-wide">The library</h2>
     <div class="grid sm:grid-cols-2 gap-4">
       {books.map(book => (
-        <div class="block border border-gray-200 rounded-lg p-5">
+        <div class="block border-2 border-ink bg-white p-5">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xl font-bold" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em;">{book.label} Vol. I</span>
-            <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{book.status}</span>
+            <span class="font-display uppercase text-xl tracking-wide">{book.label} Vol. I</span>
+            <span class="text-xs font-mono font-semibold uppercase tracking-wide text-red">{book.status}</span>
           </div>
-          <p class="text-gray-600 text-sm">Built for print-on-demand — details coming soon.</p>
+          <p class="text-mid text-sm">Built for print-on-demand — details coming soon.</p>
         </div>
       ))}
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="bg-[#111] text-white">
+  <!-- CTA (dark) -->
+  <section class="bg-ink text-cream">
     <div class="container mx-auto px-6 py-16 max-w-3xl text-center">
-      <h2 class="text-3xl mb-4" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em;">Find out if you really know ball</h2>
-      <p class="text-gray-300">Coming to print-on-demand soon.</p>
+      <h2 class="font-display uppercase text-3xl mb-4 tracking-wide">Find out if you really know ball</h2>
+      <p class="text-cream-dark">Coming to print-on-demand soon.</p>
     </div>
   </section>
 
-  <footer class="py-8 text-center text-xs text-gray-400" style="font-family: 'IBM Plex Mono', monospace;">
+  <footer class="py-8 text-center text-xs text-mid font-mono uppercase tracking-widest bg-cream">
     dykbtrivia.com
   </footer>
 

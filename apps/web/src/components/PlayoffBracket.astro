@@ -79,9 +79,9 @@ const FONT = 10.5 * TEXT_SCALE; // font size in pt
 function slot(x: number, y: number, w: number, label: string): string {
   const parts: string[] = [];
   if (label) {
-    parts.push(`<text x="${x}" y="${y - 4}" font-size="${FONT}pt" fill="#222" dominant-baseline="auto">${label}</text>`);
+    parts.push(`<text x="${x}" y="${y - 4}" font-size="${FONT}pt" fill="#1a1a1a" dominant-baseline="auto">${label}</text>`);
   }
-  parts.push(`<line x1="${x}" y1="${y + 2}" x2="${x + w}" y2="${y + 2}" stroke="#444" stroke-width="${LW}" />`);
+  parts.push(`<line x1="${x}" y1="${y + 2}" x2="${x + w}" y2="${y + 2}" stroke="#555555" stroke-width="${LW}" />`);
   return parts.join('\n');
 }
 
@@ -90,8 +90,8 @@ function slot(x: number, y: number, w: number, label: string): string {
 function connector(rightX: number, y1: number, y2: number): string {
   const midY = (y1 + y2) / 2;
   return [
-    `<line x1="${rightX}" y1="${y1 + 2}" x2="${rightX}" y2="${y2 + 2}" stroke="#333" stroke-width="${LW}" />`,
-    `<line x1="${rightX}" y1="${midY + 2}" x2="${rightX + CGAP}" y2="${midY + 2}" stroke="#333" stroke-width="${LW}" />`,
+    `<line x1="${rightX}" y1="${y1 + 2}" x2="${rightX}" y2="${y2 + 2}" stroke="#1a1a1a" stroke-width="${LW}" />`,
+    `<line x1="${rightX}" y1="${midY + 2}" x2="${rightX + CGAP}" y2="${midY + 2}" stroke="#1a1a1a" stroke-width="${LW}" />`,
   ].join('\n');
 }
 
@@ -110,19 +110,19 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     if (seed) {
       const seedText = `#${seed}`;
       const seedLabel = label ? `${seedText}  ${label}` : seedText;
-      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" font-family="'IBM Plex Mono', monospace" fill="#222" dominant-baseline="auto" text-anchor="${anchor}"><tspan font-weight="700" font-size="${13 * TEXT_SCALE}pt" fill="#111">${seedText}</tspan>  ${label}</text>`);
+      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" font-family="'IBM Plex Mono', monospace" fill="#1a1a1a" dominant-baseline="auto" text-anchor="${anchor}"><tspan font-weight="700" font-size="${13 * TEXT_SCALE}pt" fill="#1a1a1a">${seedText}</tspan>  ${label}</text>`);
     } else if (label) {
-      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" font-family="'IBM Plex Mono', monospace" fill="#222" dominant-baseline="auto" text-anchor="${anchor}">${label}</text>`);
+      parts.push(`<text x="${tx}" y="${oy + y - 4}" font-size="${FONT}pt" font-family="'IBM Plex Mono', monospace" fill="#1a1a1a" dominant-baseline="auto" text-anchor="${anchor}">${label}</text>`);
     }
-    parts.push(`<line x1="${sx}" y1="${oy + y + 2}" x2="${sx + w}" y2="${oy + y + 2}" stroke="#444" stroke-width="${LW}" />`);
+    parts.push(`<line x1="${sx}" y1="${oy + y + 2}" x2="${sx + w}" y2="${oy + y + 2}" stroke="#555555" stroke-width="${LW}" />`);
   };
 
   const addConnector = (x: number, y1: number, y2: number, gap: number = CGAP) => {
     const cx = fx(x);
     const toX = rtl ? cx - gap : cx + gap;
     const midY = oy + (y1 + y2) / 2 + 2;
-    parts.push(`<line x1="${cx}" y1="${oy + y1 + 2}" x2="${cx}" y2="${oy + y2 + 2}" stroke="#333" stroke-width="${LW}" />`);
-    parts.push(`<line x1="${cx}" y1="${midY}" x2="${toX}" y2="${midY}" stroke="#333" stroke-width="${LW}" />`);
+    parts.push(`<line x1="${cx}" y1="${oy + y1 + 2}" x2="${cx}" y2="${oy + y2 + 2}" stroke="#1a1a1a" stroke-width="${LW}" />`);
+    parts.push(`<line x1="${cx}" y1="${midY}" x2="${toX}" y2="${midY}" stroke="#1a1a1a" stroke-width="${LW}" />`);
   };
 
   const t = (i: number) => seeds[i] || '';
@@ -166,7 +166,7 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     const div2Mid = (div2y1 + div2y2) / 2;
     const divCombX = divX + COL + COL;
     const fdcx = fx(divCombX);
-    parts.push(`<line x1="${fdcx}" y1="${oy + div1Mid + 2}" x2="${fdcx}" y2="${oy + div2Mid + 2}" stroke="#333" stroke-width="${LW}" />`);
+    parts.push(`<line x1="${fdcx}" y1="${oy + div1Mid + 2}" x2="${fdcx}" y2="${oy + div2Mid + 2}" stroke="#1a1a1a" stroke-width="${LW}" />`);
 
     // CC slot
     const ccX = divX + COL + COL;
@@ -212,7 +212,7 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
     const div2Mid = (div2y1 + div2y2) / 2;
     const divCombX = divX + COL + COL;
     const fdcx = fx(divCombX);
-    parts.push(`<line x1="${fdcx}" y1="${oy + div1Mid + 2}" x2="${fdcx}" y2="${oy + div2Mid + 2}" stroke="#333" stroke-width="${LW}" />`);
+    parts.push(`<line x1="${fdcx}" y1="${oy + div1Mid + 2}" x2="${fdcx}" y2="${oy + div2Mid + 2}" stroke="#1a1a1a" stroke-width="${LW}" />`);
 
     // CC slot
     const ccX = divX + COL + COL;
@@ -228,7 +228,7 @@ function confBracket(seeds: string[], ox: number, oy: number, rtl: boolean, mirr
 // ── Round headers ──────────────────────────────────────────────────────────────
 function roundHeaders(ox: number, oy: number, rtl: boolean, mirrorW: number, confW: number, conf?: 'AFC' | 'NFC'): string {
   const fx = (x: number) => rtl ? ox + mirrorW - x : ox + x;
-  const style = `font-size:${8 * TEXT_SCALE}pt;font-family:'IBM Plex Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;fill:#555;`;
+  const style = `font-size:${8 * TEXT_SCALE}pt;font-family:'IBM Plex Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;fill:#555555;`;
   const parts: string[] = [];
 
   const wcMid = COL / 2;
@@ -272,7 +272,7 @@ if (hasBoth) {
   svgHeight = nfcOY + nfcResult.h;
 
   const parts: string[] = [];
-  const confStyle = `font-size:${18 * TEXT_SCALE}pt;font-family:'Bebas Neue',sans-serif;letter-spacing:0.08em;text-transform:uppercase;fill:#111;`;
+  const confStyle = `font-size:${18 * TEXT_SCALE}pt;font-family:'Anton',sans-serif;letter-spacing:0.08em;text-transform:uppercase;fill:#1a1a1a;`;
   parts.push(`<text x="${confW / 2}" y="${CONF_LABEL_H - 4}" text-anchor="middle" style="${confStyle}">AFC</text>`);
   parts.push(`<text x="${confW / 2}" y="${nfcSectionTop + CONF_LABEL_H - 4}" text-anchor="middle" style="${confStyle}">NFC</text>`);
 
@@ -285,15 +285,15 @@ if (hasBoth) {
   // the AFC and NFC Championship outputs
   const sbX = confW;
   const sbCY = (afcResult.ccY + nfcResult.ccY) / 2;
-  parts.push(`<line x1="${sbX + 10}" y1="${sbCY + 2}" x2="${sbX + SB_W - 10}" y2="${sbCY + 2}" stroke="#444" stroke-width="${LW}" />`);
+  parts.push(`<line x1="${sbX + 10}" y1="${sbCY + 2}" x2="${sbX + SB_W - 10}" y2="${sbCY + 2}" stroke="#555555" stroke-width="${LW}" />`);
 
   // Connect each Conference Championship output to the Super Bowl cell —
   // vertical run down to the Super Bowl's row, then a short horizontal stub
   // bridging into its blank line (which starts 10px right of ccEdgeX/sbX).
-  parts.push(`<line x1="${afcResult.ccEdgeX}" y1="${afcResult.ccY + 2}" x2="${afcResult.ccEdgeX}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
-  parts.push(`<line x1="${afcResult.ccEdgeX}" y1="${sbCY + 2}" x2="${sbX + 10}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
-  parts.push(`<line x1="${nfcResult.ccEdgeX}" y1="${nfcResult.ccY + 2}" x2="${nfcResult.ccEdgeX}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
-  parts.push(`<line x1="${nfcResult.ccEdgeX}" y1="${sbCY + 2}" x2="${sbX + 10}" y2="${sbCY + 2}" stroke="#333" stroke-width="${LW}" />`);
+  parts.push(`<line x1="${afcResult.ccEdgeX}" y1="${afcResult.ccY + 2}" x2="${afcResult.ccEdgeX}" y2="${sbCY + 2}" stroke="#1a1a1a" stroke-width="${LW}" />`);
+  parts.push(`<line x1="${afcResult.ccEdgeX}" y1="${sbCY + 2}" x2="${sbX + 10}" y2="${sbCY + 2}" stroke="#1a1a1a" stroke-width="${LW}" />`);
+  parts.push(`<line x1="${nfcResult.ccEdgeX}" y1="${nfcResult.ccY + 2}" x2="${nfcResult.ccEdgeX}" y2="${sbCY + 2}" stroke="#1a1a1a" stroke-width="${LW}" />`);
+  parts.push(`<line x1="${nfcResult.ccEdgeX}" y1="${sbCY + 2}" x2="${sbX + 10}" y2="${sbCY + 2}" stroke="#1a1a1a" stroke-width="${LW}" />`);
 
   svgContent = parts.join('\n');
 } else {
