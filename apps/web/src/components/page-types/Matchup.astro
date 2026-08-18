@@ -21,8 +21,8 @@ if (!items || items.length === 0) {
 }
 ---
 
-<div class="max-w-4xl mx-auto">
-  <div class={`grid gap-x-6 gap-y-4 print:gap-y-3`} style={`grid-template-columns: repeat(${columns}, 1fr)`}>
+<div class="w-full max-w-4xl mx-auto flex-1 min-h-0 flex flex-col">
+  <div class="matchup-grid flex-1" style={`grid-template-columns: repeat(${columns}, 1fr)`}>
     {items.map((item) => (
       <div class="border-2 border-ink print:border-black p-4 print:p-3">
         {item.context && (
@@ -63,7 +63,19 @@ if (!items || items.length === 0) {
 </div>
 
 <style>
+  .matchup-grid {
+    display: grid;
+    column-gap: 24px;
+    row-gap: 16px;
+    align-content: space-between;
+    padding-block: 8px;
+  }
+
   @media print {
+    .matchup-grid {
+      row-gap: 12px;
+    }
+
     .matchup-context,
     .matchup-center {
       font-family: 'IBM Plex Mono', monospace;

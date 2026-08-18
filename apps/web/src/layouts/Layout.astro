@@ -70,7 +70,7 @@ const tocEntries = tocEntriesProp ?? (book ? buildToc(book.pages) : []);
     {showsHeader && (
       <PageHeader title={title} currentPage={currentPage} pageTitle={pageTitle} pageDescription={pageDescription} category={category} difficulty={difficulty} actionContent={actionContent} bookId={bookId} itemCount={itemCount} pageType={pageType} />
     )}
-    <main class="flex-1 container mx-auto px-4 print:p-0 print:m-0 print:max-w-none print:flex print:flex-col print:justify-center">
+    <main class="flex-1 flex flex-col container mx-auto px-4 print:p-0 print:m-0 print:max-w-none print:justify-center">
       <slot />
     </main>
     <SiteFooter currentPage={currentPage} totalPages={totalPages} />
