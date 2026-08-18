@@ -1,5 +1,5 @@
 ---
-import type { ListItem } from '../utils/pageTypes.js';
+import type { ListItem } from '../../utils/pageTypes.js';
 
 interface Props {
   items: ListItem[];
@@ -10,49 +10,129 @@ interface Props {
 
 const {
   items,
-  columns = 2,
+  columns = 1,
   showInstructions = false,
   instructionText = ""
 } = Astro.props as Props;
 
-// Validate that items array is not empty
 if (!items || items.length === 0) {
   throw new Error('List component requires at least one item');
 }
 
-// Helper function to get the clue text for an item
-function getClueText(item: ListItem, index: number): string {
-  // Priority: clue > year > label > auto-number
-  if (item.clue !== undefined) {
-    return `${item.clue}`;
+// ── Label type + text, per DYKB list-format spec ───────────────────────────
+// Priority: clue > legacy year > legacy label > no label ("plain")
+type LabelType = 'ranked' | 'year' | 'custom' | 'plain';
+
+interface RowLabel {
+  type: LabelType;
+  text: string;
+}
+
+function getRowLabel(item: ListItem): RowLabel {
+  if (item.clue !== undefined && item.clue !== '') {
+    if (typeof item.clue === 'number') {
+      return { type: 'year', text: `${item.clue}:` };
+    }
+    const text = `${item.clue}`;
+    if (/^#\d+$/.test(text)) {
+      return { type: 'ranked', text };
+    }
+    return { type: 'custom', text };
   }
   if (item.year !== undefined) {
-    return `${item.year}`;
+    return { type: 'year', text: `${item.year}:` };
   }
-  if (item.label !== undefined) {
-    return item.label;
+  if (item.label) {
+    return { type: 'custom', text: item.label };
   }
-  return `${index + 1}.`;
+  return { type: 'plain', text: '' };
 }
+
+// Width is computed once per column (from the widest label of each type in
+// that column), not per row — otherwise "#1" and "#10" get different-width
+// boxes, which throws off number alignment and makes answer lines uneven.
+function getColumnLabelWidths(labels: RowLabel[]): Partial<Record<LabelType, number>> {
+  const rankedDigits = labels.filter(l => l.type === 'ranked').map(l => l.text.replace('#', '').length);
+  const customLens = labels.filter(l => l.type === 'custom').map(l => l.text.length);
+  return {
+    ranked: rankedDigits.length ? Math.max(36, Math.max(...rankedDigits) * 16 + 12) : undefined,
+    year: 48,
+    custom: customLens.length ? Math.max(40, Math.min(140, Math.max(...customLens) * 7 + 16)) : undefined,
+  };
+}
+
+// ── Density tier: row-height/font scaling driven by item count ─────────────
+interface DensityTier {
+  labelPx: number;
+  rankPx: number;
+  topPad: number;
+  bottomPad: number;
+  separator: boolean;
+  screenGap: number;
+}
+
+function getDensityTier(count: number): DensityTier {
+  if (count <= 8) return { labelPx: 12, rankPx: 36, topPad: 12, bottomPad: 8, separator: true, screenGap: 16 };
+  if (count <= 12) return { labelPx: 11, rankPx: 28, topPad: 8, bottomPad: 4, separator: true, screenGap: 12 };
+  if (count <= 18) return { labelPx: 10, rankPx: 22, topPad: 4, bottomPad: 2, separator: false, screenGap: 8 };
+  if (count <= 25) return { labelPx: 10, rankPx: 18, topPad: 4, bottomPad: 2, separator: false, screenGap: 6 };
+  return { labelPx: 9, rankPx: 16, topPad: 2, bottomPad: 0, separator: false, screenGap: 4 };
+}
+
+// Split into `columns` contiguous chunks; each chunk is its own
+// space-between list sized off its own item count.
+function splitIntoColumns<T>(list: T[], count: number): T[][] {
+  if (count <= 1) return [list];
+  const perColumn = Math.ceil(list.length / count);
+  const chunks: T[][] = [];
+  for (let i = 0; i < list.length; i += perColumn) {
+    chunks.push(list.slice(i, i + perColumn));
+  }
+  return chunks;
+}
+
+const columnChunks = splitIntoColumns(items, columns);
+const renderColumns = columnChunks.map((chunk) => {
+  const tier = getDensityTier(chunk.length);
+  const labels = chunk.map((item) => getRowLabel(item));
+  const widths = getColumnLabelWidths(labels);
+  const rows = chunk.map((item, i) => {
+    const label = labels[i];
+    return { item, label, width: widths[label.type] };
+  });
+  return { tier, rows };
+});
 ---
 
-<div class="max-w-4xl mx-auto">
-  <div class={`grid gap-x-8 gap-y-3 print:gap-y-2`} style={`grid-template-columns: repeat(${columns}, 1fr)`}>
-    {items.map((item, index) => (
-      <div class="flex items-center">
-        <span class="clue-text font-bold text-ink print:text-black w-16 text-sm print:text-xs flex-shrink-0">
-          {getClueText(item, index)}:
-        </span>
-        <div class="flex-1 border-b border-mid/40 print:border-black ml-2 h-5 print:h-4"></div>
-        {item.hasNote && (
-          <span class="text-xs text-red print:text-black ml-1">*</span>
-        )}
+<div class="w-full max-w-4xl mx-auto flex-1 min-h-0 flex flex-col print:max-w-none">
+  <div class="columns-wrap flex-1" style={`--column-count:${renderColumns.length}`}>
+    {renderColumns.map(({ tier, rows }) => (
+      <div
+        class="list-content"
+        style={`--label-print:${tier.labelPx}px; --rank-print:${tier.rankPx}px; --label-screen:${Math.round(tier.labelPx * 1.3)}px; --rank-screen:${Math.round(tier.rankPx * 1.15)}px; --pad-top:${tier.topPad}px; --pad-bottom:${tier.bottomPad}px; --row-gap:${tier.screenGap}px;`}
+      >
+        {rows.map(({ item, label, width }) => (
+          <div class={`list-row${tier.separator ? ' list-row--sep' : ''}`}>
+            {label.type !== 'plain' && (
+              <span
+                class={`clue-label clue-label--${label.type}`}
+                style={width ? `width:${width}px` : undefined}
+              >
+                {label.text}
+              </span>
+            )}
+            <div class="answer-line"></div>
+            {item.hasNote && (
+              <span class="text-xs text-red print:text-black ml-1">*</span>
+            )}
+          </div>
+        ))}
       </div>
     ))}
   </div>
 
   {(items.some(item => item.hasNote) || showInstructions) && (
-    <div class="mt-4 text-xs text-mid print:text-black print:text-xs font-mono">
+    <div class="mt-4 text-xs text-mid print:text-black font-mono">
       {items.some(item => item.hasNote) && items.find(item => item.noteText) && (
         <p><strong>*Note:</strong> {items.find(item => item.noteText)?.noteText}</p>
       )}
@@ -66,9 +146,77 @@ function getClueText(item: ListItem, index: number): string {
 </div>
 
 <style>
+  .columns-wrap {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    padding-block: 8px;
+  }
+
+  .list-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--row-gap);
+    padding-top: var(--pad-top);
+    padding-bottom: var(--pad-bottom);
+  }
+
+  .list-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .list-row--sep:not(:last-child) {
+    padding-bottom: 6px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .clue-label {
+    flex-shrink: 0;
+    color: #1a1a1a;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: var(--label-screen);
+  }
+
+  .clue-label--ranked {
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    text-align: right;
+    font-size: var(--rank-screen);
+    line-height: 1;
+  }
+
+  .clue-label--year {
+    font-weight: 700;
+  }
+
+  .answer-line {
+    flex: 1;
+    min-width: 120px;
+    border-bottom: 1px solid #1a1a1a;
+    height: 1.6em;
+  }
+
   @media print {
-    .clue-text {
-      font-family: 'IBM Plex Mono', monospace;
+    .list-content {
+      gap: 0;
+    }
+
+    .clue-label {
+      font-size: var(--label-print);
+    }
+
+    .clue-label--ranked {
+      font-size: var(--rank-print);
+    }
+
+    .answer-line {
+      height: auto;
     }
   }
 </style>

@@ -62,6 +62,12 @@ const registryContext = { bookId, tocEntries };
 const componentProps = entry.getComponentProps(pageConfiguration, registryContext);
 const headerProps = entry.getHeaderProps(pageConfiguration);
 const PageComponent = entry.component;
+
+// Most page types distribute their content across the full available height
+// (space-between rows/cards), so their card wrapper needs to stretch to fill
+// that height rather than shrink-wrapping its content. `toc` opts out — it
+// manages its own full-bleed page height independently (see TableOfContents.astro).
+const fillsHeight = pageType !== 'toc';
 ---
 
 <Layout
@@ -81,8 +87,11 @@ const PageComponent = entry.component;
   showsHeader={entry.showsHeader}
   showsFooter={entry.showsFooter}
 >
-  <div class="relative bg-white rounded-lg shadow-lg p-8 px-24 pt-2 max-w-4xl mx-auto print:bg-transparent print:shadow-none print:p-0 print:pt-0 print:max-w-none print:m-0 print:pb-0 print:rounded-none">
-    <div class="prose prose-lg max-w-none">
+  <div class:list={[
+    "relative bg-white rounded-lg shadow-lg p-8 px-24 pt-2 max-w-4xl mx-auto print:bg-transparent print:shadow-none print:p-0 print:pt-0 print:max-w-none print:m-0 print:pb-0 print:rounded-none",
+    fillsHeight && "w-full flex-1 flex flex-col"
+  ]}>
+    <div class:list={["prose prose-lg max-w-none", fillsHeight && "w-full flex-1 flex flex-col"]}>
       <PageComponent {...componentProps} />
     </div>
   </div>
