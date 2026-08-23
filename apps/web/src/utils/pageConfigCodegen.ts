@@ -111,12 +111,13 @@ export function serializePage(page: PageConfig): string {
     if (page.type === 'list') {
       const itemsStr = serializeListItems(page.items);
       lines.push(`  items: ${itemsStr.split('\n').join('\n  ')},`);
+      // Matchup pages are always single-column, so only lists carry `columns`.
+      lines.push(`  columns: ${page.columns},`);
     } else {
       const itemsStr = serializeMatchupItems(page.items);
       lines.push(`  items: ${itemsStr.split('\n').join('\n  ')},`);
     }
 
-    lines.push(`  columns: ${page.columns},`);
     lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)},`);
     lines.push(...serializeActionContentLine(page.actionContent));
   }

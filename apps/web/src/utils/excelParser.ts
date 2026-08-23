@@ -140,7 +140,6 @@ export function parseBookPages(pagesRaw: any[], matchupRaw: any[], bookId: strin
         description:  desc,
         ...commonFields,
         items,
-        columns,
         answerKeyUrl: url,
         ...(realAnswerUrl ? { realAnswerUrl } : {}),
       });
