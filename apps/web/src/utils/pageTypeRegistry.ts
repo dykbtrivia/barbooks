@@ -69,7 +69,7 @@ export const pageTypeRegistry: Record<PageType, PageTypeRegistryEntry> = {
     component: Matchup,
     getComponentProps: (page) => {
       const p = page as MatchupPageConfig;
-      return { items: p.items, columns: p.columns, showInstructions: p.showInstructions, instructionText: p.instructionText };
+      return { items: p.items, showInstructions: p.showInstructions, instructionText: p.instructionText };
     },
     getHeaderProps: (page) => {
       const p = page as MatchupPageConfig;

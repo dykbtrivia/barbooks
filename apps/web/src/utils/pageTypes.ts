@@ -66,7 +66,6 @@ export interface MatchupPageConfig {
   subcategory?: string;
   difficulty?: PageDifficulty;
   items: MatchupItem[];
-  columns?: number;
   showInstructions?: boolean;
   instructionText?: string;
   answerKeyUrl?: string;

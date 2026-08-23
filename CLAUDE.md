@@ -141,7 +141,7 @@ The sync pipeline is split across four files, each with one job:
 | C | title | Page heading |
 | D | description | Subtitle or, for `text` pages, the full content |
 | E | itemsNote | Item count/clue style (list pages only) |
-| F | columns | Grid column count |
+| F | columns | Grid column count (list pages only — matchup pages are always single-column) |
 | G | answerKeyUrl | URL for the answer key QR code |
 | H | actionNote | Optional badge content (HTML allowed) |
 | I | notePosition | `left` or `right` |
@@ -185,7 +185,6 @@ interface MatchupPageConfig {
   title: string;
   description?: string;
   items: MatchupItem[];     // each item has centerText and optional context
-  columns?: number;
   showInstructions?: boolean;  // true by default for matchups
   instructionText?: string;
   answerKeyUrl?: string;

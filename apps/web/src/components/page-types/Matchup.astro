@@ -1,16 +1,14 @@
 ---
-import type { MatchupItem } from '../utils/pageTypes.js';
+import type { MatchupItem } from '../../utils/pageTypes.js';
 
 interface Props {
   items: MatchupItem[];
-  columns?: number;
   showInstructions?: boolean;
   instructionText?: string;
 }
 
 const {
   items,
-  columns = 2,
   showInstructions = true,
   instructionText = ""
 } = Astro.props as Props;
@@ -19,42 +17,106 @@ const {
 if (!items || items.length === 0) {
   throw new Error('Matchup component requires at least one item');
 }
+
+// ── Label type + text, per DYKB matchup-grid spec ──────────────────────────
+// year   → 4-digit season, Anton (the default case)
+// round  → short round code ("WC", "DIV", "CONF", "WK 17"), Plex Mono
+// custom → anything longer ("Super Bowl LVIII (2024)"), Plex Mono, wider column
+type LabelType = 'year' | 'round' | 'custom' | 'plain';
+
+interface RowLabel {
+  type: LabelType;
+  text: string;
+}
+
+function getRowLabel(item: MatchupItem): RowLabel {
+  if (item.context === undefined || item.context === '') {
+    return { type: 'plain', text: '' };
+  }
+  const text = `${item.context}`;
+  if (/^\d{4}$/.test(text)) return { type: 'year', text };
+  if (text.length <= 6) return { type: 'round', text };
+  return { type: 'custom', text };
+}
+
+// The label and divider columns are sized once per column of rows, off the
+// widest entry — otherwise "2024" and "WC" (or "vs" and "31-17") would get
+// different-width tracks and the answer lines wouldn't line up down the page.
+// The 50px baseline from the spec is a print-size minimum; screen renders the
+// same labels ~15–30% larger, so the track has to grow with the font or a
+// four-digit year wraps mid-number.
+function getLabelWidth(labels: RowLabel[], yearPx: number, monoPx: number): number {
+  const hasYear = labels.some(l => l.type === 'year');
+  const monoLens = labels.filter(l => l.type !== 'year' && l.type !== 'plain').map(l => l.text.length);
+  const yearWidth = hasYear ? yearPx * 2.3 : 0;
+  const monoWidth = monoLens.length ? Math.max(...monoLens) * monoPx * 0.65 + 6 : 0;
+  return Math.round(Math.max(50, Math.min(130, Math.max(yearWidth, monoWidth))));
+}
+
+function getDividerWidth(rows: MatchupItem[], vsPx: number): number {
+  const longest = Math.max(...rows.map(r => `${r.centerText ?? ''}`.length));
+  return Math.round(Math.max(30, Math.min(80, longest * vsPx * 0.6 + 8)));
+}
+
+// ── Density tier: font/padding scaling driven by item count ────────────────
+// Row heights themselves come from `space-between`, not explicit heights.
+interface DensityTier {
+  yearPx: number;   // Anton year label
+  monoPx: number;   // Plex Mono round/custom label
+  vsPx: number;     // centre divider
+  topPad: number;
+  bottomPad: number;
+  separator: 'strong' | 'light';
+  screenGap: number;
+}
+
+function getDensityTier(count: number): DensityTier {
+  if (count <= 6) return { yearPx: 28, monoPx: 12, vsPx: 16, topPad: 12, bottomPad: 8, separator: 'strong', screenGap: 16 };
+  if (count <= 10) return { yearPx: 22, monoPx: 11, vsPx: 14, topPad: 8, bottomPad: 4, separator: 'light', screenGap: 12 };
+  if (count <= 15) return { yearPx: 18, monoPx: 10, vsPx: 12, topPad: 4, bottomPad: 2, separator: 'light', screenGap: 8 };
+  return { yearPx: 16, monoPx: 10, vsPx: 11, topPad: 4, bottomPad: 2, separator: 'light', screenGap: 6 };
+}
+
+// Matchup rows are always a single full-width column — each row already holds
+// two answer fields, so splitting them across page columns leaves lines too
+// short to write a team name on.
+const tier = getDensityTier(items.length);
+const labels = items.map(getRowLabel);
+const rows = items.map((item, i) => ({ item, label: labels[i] }));
+const screen = {
+  yearPx: Math.round(tier.yearPx * 1.15),
+  monoPx: Math.round(tier.monoPx * 1.3),
+  vsPx: Math.round(tier.vsPx * 1.15),
+};
+const labelWidth = {
+  print: getLabelWidth(labels, tier.yearPx, tier.monoPx),
+  screen: getLabelWidth(labels, screen.yearPx, screen.monoPx),
+};
+const dividerWidth = {
+  print: getDividerWidth(items, tier.vsPx),
+  screen: getDividerWidth(items, screen.vsPx),
+};
 ---
 
-<div class="w-full max-w-4xl mx-auto flex-1 min-h-0 flex flex-col">
-  <div class="matchup-grid flex-1" style={`grid-template-columns: repeat(${columns}, 1fr)`}>
-    {items.map((item) => (
-      <div class="border-2 border-ink print:border-black p-4 print:p-3">
-        {item.context && (
-          <div class="matchup-context text-xs text-mid print:text-black mb-2 font-medium">
-            {item.context}
-          </div>
-        )}
-
-        <div class="flex items-center justify-between gap-3">
-          <!-- Left team/participant -->
-          <div class="flex-1">
-            <div class="border-b-2 border-ink/30 print:border-black h-6 print:h-5 w-full"></div>
-          </div>
-
-          <!-- Center text (vs, score, etc.) -->
-          <div class="flex-shrink-0 px-2">
-            <span class="matchup-center font-bold text-red print:text-black text-sm print:text-xs">
-              {item.centerText}
-            </span>
-          </div>
-
-          <!-- Right team/participant -->
-          <div class="flex-1">
-            <div class="border-b-2 border-ink/30 print:border-black h-6 print:h-5 w-full"></div>
-          </div>
+<div class="w-full max-w-4xl mx-auto flex-1 min-h-0 flex flex-col print:max-w-none">
+  <div class="content-wrap flex-1">
+    <div
+      class="matchup-content"
+      style={`--label-w:${labelWidth.screen}px; --label-w-print:${labelWidth.print}px; --divider-w:${dividerWidth.screen}px; --divider-w-print:${dividerWidth.print}px; --year-print:${tier.yearPx}px; --year-screen:${screen.yearPx}px; --mono-print:${tier.monoPx}px; --mono-screen:${screen.monoPx}px; --vs-print:${tier.vsPx}px; --vs-screen:${screen.vsPx}px; --pad-top:${tier.topPad}px; --pad-bottom:${tier.bottomPad}px; --row-gap:${tier.screenGap}px; --sep-color:${tier.separator === 'strong' ? '#ddd' : '#eee'};`}
+    >
+      {rows.map(({ item, label }) => (
+        <div class="matchup-row">
+          <span class={`matchup-label matchup-label--${label.type}`}>{label.text}</span>
+          <div class="answer-line"></div>
+          <span class="matchup-divider">{item.centerText}</span>
+          <div class="answer-line"></div>
         </div>
-      </div>
-    ))}
+      ))}
+    </div>
   </div>
 
-  {showInstructions && (
-    <div class="mt-4 text-xs text-mid print:text-black print:text-xs font-mono">
+  {showInstructions && instructionText && (
+    <div class="mt-4 text-xs text-mid print:text-black font-mono">
       <p>
         <strong>Instructions:</strong> {instructionText}
       </p>
@@ -63,22 +125,98 @@ if (!items || items.length === 0) {
 </div>
 
 <style>
-  .matchup-grid {
-    display: grid;
-    column-gap: 24px;
-    row-gap: 16px;
-    align-content: space-between;
+  /* Outer 8px band + the tier's own pads, same two-level padding as List. */
+  .content-wrap {
+    display: flex;
+    flex-direction: column;
     padding-block: 8px;
   }
 
+  .matchup-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--row-gap);
+    padding-top: var(--pad-top);
+    padding-bottom: var(--pad-bottom);
+  }
+
+  .matchup-row {
+    display: grid;
+    grid-template-columns: var(--label-w) 1fr var(--divider-w) 1fr;
+    column-gap: 6px;
+    align-items: center;
+  }
+
+  .matchup-row:not(:last-child) {
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--sep-color);
+  }
+
+  .matchup-label {
+    color: #1a1a1a;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: var(--mono-screen);
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  .matchup-label--year {
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    font-size: var(--year-screen);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .matchup-label--round {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .matchup-divider {
+    font-family: 'Anton', sans-serif;
+    font-size: var(--vs-screen);
+    line-height: 1;
+    color: var(--color-red);
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .answer-line {
+    border-bottom: 1px solid #1a1a1a;
+    height: 1.6em;
+    min-width: 60px;
+  }
+
   @media print {
-    .matchup-grid {
-      row-gap: 12px;
+    .matchup-content {
+      gap: 0;
     }
 
-    .matchup-context,
-    .matchup-center {
-      font-family: 'IBM Plex Mono', monospace;
+    .matchup-row {
+      grid-template-columns: var(--label-w-print) 1fr var(--divider-w-print) 1fr;
+    }
+
+    .matchup-label {
+      font-size: var(--mono-print);
+    }
+
+    .matchup-label--year {
+      font-size: var(--year-print);
+    }
+
+    .matchup-divider {
+      font-size: var(--vs-print);
+      color: #555555;
+    }
+
+    .answer-line {
+      height: 18px;
+      border-color: #000;
     }
   }
 </style>

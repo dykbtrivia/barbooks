@@ -46,7 +46,6 @@ export interface MatchupPage {
   subcategory?:  string;
   difficulty?:   PageDifficulty;
   items:         MatchupItem[];
-  columns:       number;
   answerKeyUrl:  string;
   realAnswerUrl?: string;
   actionContent?: ActionContent;
