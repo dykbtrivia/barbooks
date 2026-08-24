@@ -93,7 +93,20 @@ async function main() {
   const bookIds = bookFilter ? [bookFilter] : Object.keys(booksConfig);
 
   // 5. Launch browser (puppeteer ships its own Chrome, installed by `npm install`)
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+  //
+  // protocolTimeout is raised from puppeteer's 180s default: printing a whole
+  // book is hundreds of sequential CDP round-trips and the default has been
+  // hit in practice partway through a run.
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox'],
+    protocolTimeout: 300_000,
+  });
+
+  // One tab is reused for every page of every book. Opening and closing a tab
+  // per page costs two extra CDP round-trips each and has proven flaky over a
+  // 193-page run; page.goto() fully replaces the document anyway.
+  const page = await browser.newPage();
 
   try {
     for (const bookId of bookIds) {
@@ -113,23 +126,18 @@ async function main() {
         const url = `${BASE_URL}/${bookId}/${pageNum}/`;
         log(`  Page ${pageNum}: ${url}`);
 
-        const page = await browser.newPage();
-        try {
-          await page.goto(url, { waitUntil: 'networkidle0' });
-          // Wait for QR codes to render
-          await sleep(500);
+        await page.goto(url, { waitUntil: 'networkidle0' });
+        // Wait for QR codes to render
+        await sleep(500);
 
-          const pdfBytes = await page.pdf({
-            width: '6in',
-            height: '9in',
-            printBackground: true,
-            margin: { top: '0', right: '0', bottom: '0', left: '0' },
-          });
+        const pdfBytes = await page.pdf({
+          width: '6in',
+          height: '9in',
+          printBackground: true,
+          margin: { top: '0', right: '0', bottom: '0', left: '0' },
+        });
 
-          pagePdfs.push(Buffer.from(pdfBytes));
-        } finally {
-          await page.close();
-        }
+        pagePdfs.push(Buffer.from(pdfBytes));
       }
 
       // 6. Merge page PDFs into one book PDF
@@ -147,10 +155,11 @@ async function main() {
       writeFileSync(outPath, mergedBytes);
       log(`Saved: ${outPath}`);
     }
+    log('Done.');
   } finally {
+    // Runs on failure too, so it must not report success.
     await browser.close();
     server.kill();
-    log('Done.');
   }
 }
 
