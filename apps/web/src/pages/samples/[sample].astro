@@ -1,0 +1,78 @@
+---
+/**
+ * /samples/{id}/ — one sample page, rendered through exactly the same path a
+ * real book page takes: pageTypeRegistry → Layout → PageHeader/PageFooter.
+ *
+ * This file deliberately mirrors [book]/[page].astro rather than sharing code
+ * with it; the two differ only in where the PageConfiguration comes from
+ * (samplePages.ts vs. the generated pageConfig.ts) and in the site chrome
+ * being off so the gallery can iframe a bare page.
+ */
+import Layout from '../../layouts/Layout.astro';
+import { pageTypeRegistry } from '../../utils/pageTypeRegistry.js';
+import { samplePages, SAMPLE_TOC_ENTRIES } from '../../utils/samplePages.js';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths: GetStaticPaths = () =>
+  samplePages.map((sample) => ({
+    params: { sample: sample.id },
+    props: { sample },
+  }));
+
+const { sample } = Astro.props;
+const { config, pageNum } = sample;
+
+// Samples render against the NFL book so bookId-driven renderers (Teams) have
+// real data to show. The TOC sample uses fixture entries instead of the book's.
+const bookId = 'nfl';
+
+const entry = pageTypeRegistry[config.type];
+const registryContext = { bookId, tocEntries: SAMPLE_TOC_ENTRIES };
+const componentProps = entry.getComponentProps(config, registryContext);
+const headerProps = entry.getHeaderProps(config);
+const PageComponent = entry.component;
+
+// Same rule as [book]/[page].astro — every type but `toc` stretches to fill
+// the page height.
+const fillsHeight = config.type !== 'toc';
+
+// No site nav on sample pages: the gallery iframes them, and a bare page is
+// also what you want when Cmd+P-ing a single sample to check its print layout.
+---
+
+<Layout
+  title={`Sample — ${sample.label}`}
+  currentPage={pageNum}
+  answerKeyUrl={'answerKeyUrl' in config ? config.answerKeyUrl : undefined}
+  bookId={bookId}
+  pageTitle={headerProps.title}
+  pageDescription={headerProps.description}
+  category={headerProps.category}
+  difficulty={headerProps.difficulty}
+  itemCount={headerProps.itemCount}
+  pageType={config.type}
+  tocEntries={SAMPLE_TOC_ENTRIES}
+  pagesSummary={[]}
+  totalPages={0}
+  showsHeader={entry.showsHeader}
+  showsFooter={entry.showsFooter}
+  showSiteChrome={false}
+>
+  <div class:list={[
+    "relative bg-white rounded-lg shadow-lg p-8 px-24 pt-2 max-w-4xl mx-auto print:bg-transparent print:shadow-none print:p-0 print:pt-0 print:max-w-none print:m-0 print:pb-0 print:rounded-none",
+    fillsHeight && "w-full flex-1 flex flex-col"
+  ]}>
+    <div class:list={["prose prose-lg max-w-none", fillsHeight && "w-full flex-1 flex flex-col"]}>
+      <PageComponent {...componentProps} />
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  /* PageHeaderScorecard reserves space at the top for the fixed SiteHeader.
+     Sample pages have no site chrome, so reclaim it — the tile then matches
+     the printed page's top edge. */
+  .header-outer {
+    padding-top: 0;
+  }
+</style>

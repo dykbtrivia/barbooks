@@ -55,9 +55,29 @@ NFL is the initial focus. Other sports (NBA, MLB, etc.) are planned as future vo
 - `npm run preview` - Preview the built site locally
 - `npm run sync-pages` - Regenerate `apps/web/src/utils/pageConfig.ts` from sport-specific Excel files
 - `npm run generate-pdf` - Generate a print-ready PDF book (see [PDF Generation](#pdf-generation) below)
+- `npm run samples-pdf` - Print each page-type sample to PDF for the `/samples/` gallery
 - `npm run astro` - Run Astro CLI commands directly
 
-> **No test framework is configured.** There are no unit or integration tests. Verify changes by running `npm run build` and `npm run dev`.
+> **No test framework is configured.** There are no unit or integration tests. Verify changes by running `npm run build` and `npm run dev`, and eyeball layout changes at **`/samples/`** (see [Page Type Samples](#page-type-samples)).
+
+### Page Type Samples
+
+`http://localhost:4321/samples/` shows one representative page of **every** page type side by side, so a layout or styling change can be checked against all renderers at once instead of hunting for a real page of each type.
+
+**Tiles show actual print output**, not a screen render — each is a raster of a real 6×9 PDF produced by the same `page.pdf()` call the book pipeline uses, so margins, page numbers and the QR footer are all visible and accurate.
+
+```sh
+npm run samples-pdf -- --dev   # fast path: print against a running `npm run dev`
+npm run samples-pdf            # build + preview + print (no dev server needed)
+npm run samples-pdf -- --only matchup,teams   # just a couple
+```
+
+- **Fixtures**: `apps/web/src/utils/samplePages.ts` — hand-written `PageConfiguration` objects, deliberately independent of the generated `pageConfig.ts` so they stay stable as book content changes. Keep each one "worst case but realistic" (full item counts, long titles, the clue styles that actually occur).
+- **Generator**: `apps/web/scripts/generate-samples-pdf.ts`. Writes `{id}.pdf` and `{id}.png` into `public/samples-pdf/` (gitignored). Uses **puppeteer**, which ships its own Chrome — no separate browser-install step. The PNG exists because Chrome's PDF viewer won't paint inside the gallery's scaled-down tiles; it's rasterized from the PDF with macOS `sips`.
+- **Pages**: `/samples/{id}/` renders through the same `pageTypeRegistry` → `Layout` → `PageHeader`/`PageFooter` path a book page does, with site chrome off (`Layout`'s `showSiteChrome={false}`). No separate preview renderer to drift.
+- **Gallery controls**: **Print/Live** toggle (Live iframes the page itself — screen CSS, but updates without regenerating), a **zoom** slider, and **Reload all** (cache-busts the images after a regenerate). Per-tile **Open PDF** / **Open page** links. Choices persist in `localStorage`.
+- **Regenerate after changing a layout** — tiles are static artifacts and will otherwise show stale output. The gallery banners any sample missing print output.
+- If a `PageType` has no sample, the gallery shows a red banner naming it — **adding a new page type means adding a sample here too**, alongside the `pageTypeRegistry.ts` entry.
 
 ## Project Architecture
 
@@ -73,7 +93,8 @@ barbooks/
 ├── .github/workflows/deploy.yml         # GitHub Actions CI/CD to GitHub Pages
 ├── apps/
 │   ├── web/
-│   │   ├── scripts/generate-pdf.ts      # PDF generation script (Playwright + pdf-lib)
+│   │   ├── scripts/generate-pdf.ts      # PDF generation script (Puppeteer + pdf-lib)
+│   │   ├── scripts/generate-samples-pdf.ts  # Prints each /samples page to PDF + PNG
 │   │   ├── scripts/seed-kv.ts           # Seeds the Worker's KV store from Excel
 │   │   ├── public/favicon.svg
 │   │   ├── NFL Barbook Trivia.xlsx      # NFL source of truth
@@ -92,6 +113,8 @@ barbooks/
 │   │       ├── pages/
 │   │       │   ├── index.astro          # Redirects to /barbooks/nfl/1/
 │   │       │   ├── [book]/[page].astro  # Dynamic route: generates pages for all books
+│   │       │   ├── samples/index.astro     # Dev gallery: every page type at once
+│   │       │   ├── samples/[sample].astro  # One sample page, real render path
 │   │       │   └── 404.astro            # Not found page
 │   │       ├── scripts/bookApp.ts       # Client-side navigation + QR codes
 │   │       ├── styles/global.css        # Tailwind v4 import
@@ -104,6 +127,7 @@ barbooks/
 │   │           ├── excelSyncTypes.ts    # Shared types for the sync pipeline
 │   │           ├── pageOrder.ts         # Category/subcategory ordering + final answerKeyUrl assignment
 │   │           ├── pageConfigCodegen.ts # PageConfig[] → pageConfig.ts source text
+│   │           ├── samplePages.ts       # Fixtures for the /samples gallery (one per page type)
 │   │           ├── tocBuilder.ts        # Builds TOC entries from ordered pages
 │   │           └── pagesSummary.ts      # Builds the page list used by SiteHeader's page picker
 │   └── worker/
@@ -300,19 +324,13 @@ The script at `scripts/generate-pdf.ts` produces a single print-ready PDF per bo
 
 1. Building the Astro site (skippable with `--skip-build`)
 2. Starting a local `astro preview` server on port 4322
-3. Using **Playwright** (Chromium) to navigate each page URL and call `page.pdf()` — output dimensions are 6×9 in (KDP trim size)
+3. Using **Puppeteer** (Chromium) to navigate each page URL and call `page.pdf()` — output dimensions are 6×9 in (KDP trim size)
 4. Stitching all per-page PDFs into one document with **pdf-lib**
 5. Writing `{bookId}-book.pdf` (or a custom path) to the project root
 
 ### Prerequisites
 
-Playwright browser binaries must be installed separately — they are not downloaded by `npm install`:
-
-```sh
-npx playwright install chromium
-```
-
-On Linux/CI the script tries a pre-installed binary at `/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome` before falling back to Playwright's auto-detection. On macOS the auto-detected path is used automatically.
+None beyond `npm install` — puppeteer's install hook downloads its own Chrome into `~/.cache/puppeteer`, so the browser can never drift out of sync with the package the way a separately-run `playwright install` can.
 
 ### CLI flags
 
@@ -337,7 +355,7 @@ npm run generate-pdf -- --book nfl --out ~/Desktop/nfl-draft.pdf
 
 ### Dependencies
 
-- `playwright` (devDependency) — headless Chromium for printing pages
+- `puppeteer` (devDependency) — headless Chromium for printing pages (bundles its own browser)
 - `pdf-lib` (devDependency) — merging individual page PDFs into one document
 
 ## Key Conventions
@@ -347,7 +365,7 @@ npm run generate-pdf -- --book nfl --out ~/Desktop/nfl-draft.pdf
 3. **`text` page content** comes from the `description` column in the spreadsheet, not a separate `content` column.
 4. **Matchup items** must exist in the "Matchup Items" sheet; an empty items array will produce a warning during sync.
 5. **`clue` is preferred over `year`/`label`** in `ListItem` — the legacy fields still render but are deprecated.
-6. **Adding new page types** requires a new variant in `pageTypes.ts` (rendering) and `excelSyncTypes.ts` (sync), a new component under `page-types/`, one entry in `pageTypeRegistry.ts`, and a new branch in `excelParser.ts`/`pageConfigCodegen.ts`. `[book]/[page].astro` and `Layout.astro` do not need to change.
+6. **Adding new page types** requires a new variant in `pageTypes.ts` (rendering) and `excelSyncTypes.ts` (sync), a new component under `page-types/`, one entry in `pageTypeRegistry.ts`, a sample in `samplePages.ts`, and a new branch in `excelParser.ts`/`pageConfigCodegen.ts`. `[book]/[page].astro` and `Layout.astro` do not need to change.
 
 ## Sub-Agent
 

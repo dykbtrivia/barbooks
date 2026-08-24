@@ -4,17 +4,17 @@
  * Generates a single print-ready PDF for each book by:
  *   1. Building the Astro site (unless --skip-build is passed)
  *   2. Starting a local preview server
- *   3. Using Playwright to print each configured page to PDF
+ *   3. Using Puppeteer to print each configured page to PDF
  *   4. Stitching all page PDFs into one book PDF with pdf-lib
  *
  * Usage:
  *   npx tsx scripts/generate-pdf.ts [--book nfl] [--skip-build] [--out output.pdf]
  */
 
-import { chromium } from 'playwright';
+import puppeteer from 'puppeteer';
 import { PDFDocument } from 'pdf-lib';
 import { spawn, type ChildProcess } from 'child_process';
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { booksConfig } from '../src/utils/pageConfig.js';
 
@@ -25,8 +25,6 @@ const bookFilter = args.includes('--book') ? args[args.indexOf('--book') + 1] : 
 const outFlagIdx = args.indexOf('--out');
 const outFlag = outFlagIdx !== -1 ? args[outFlagIdx + 1] : null;
 
-// Path to the pre-installed Playwright Chromium (avoids re-download)
-const CHROMIUM_PATH = '/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome';
 const PREVIEW_PORT = 4322;
 const BASE_URL = `http://localhost:${PREVIEW_PORT}`;
 const TMP_DIR = join(process.cwd(), '.pdf-tmp');
@@ -94,9 +92,8 @@ async function main() {
   // 4. Determine which books to process
   const bookIds = bookFilter ? [bookFilter] : Object.keys(booksConfig);
 
-  // 5. Launch browser
-  const executablePath = existsSync(CHROMIUM_PATH) ? CHROMIUM_PATH : undefined;
-  const browser = await chromium.launch({ executablePath, args: ['--no-sandbox'] });
+  // 5. Launch browser (puppeteer ships its own Chrome, installed by `npm install`)
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 
   try {
     for (const bookId of bookIds) {
@@ -118,9 +115,9 @@ async function main() {
 
         const page = await browser.newPage();
         try {
-          await page.goto(url, { waitUntil: 'networkidle' });
+          await page.goto(url, { waitUntil: 'networkidle0' });
           // Wait for QR codes to render
-          await page.waitForTimeout(500);
+          await sleep(500);
 
           const pdfBytes = await page.pdf({
             width: '6in',
