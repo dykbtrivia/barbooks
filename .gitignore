@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# generated sample previews (npm run samples-pdf)
+apps/web/public/samples-pdf/

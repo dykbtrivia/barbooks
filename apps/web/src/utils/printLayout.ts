@@ -3,7 +3,7 @@
 // PageFooter past the page boundary.
 //
 // PRINT_HEADER_HEIGHT_PX and PRINT_FOOTER_HEIGHT_PX were measured directly
-// (Playwright, @media print, 576x864 viewport) against the rendered
+// (Puppeteer, @media print, 576x864 viewport) against the rendered
 // PageHeaderScorecard and PageFooter components — they held constant across
 // page types (list/bracket/etc.) since both have fixed-size content.
 export const PRINT_PAGE_WIDTH_PX = 576;   // 6in @ 96dpi

@@ -149,6 +149,18 @@ const activeName = sorted.reduce<string | null>((active, entry, i) => {
       width: 100%;
     }
   }
+
+  /* The panel declares display:flex, which can out-order Tailwind's
+     print:hidden at equal specificity — it then still paints (off-canvas via
+     translate(-100%)), putting cream ink in the print PDF. Hide it here so
+     cascade order can't matter. */
+  @media print {
+    .toc-panel,
+    .toc-panel-backdrop {
+      display: none !important;
+    }
+  }
+
 </style>
 
 <script>

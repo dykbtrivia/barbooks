@@ -38,13 +38,16 @@ interface Props {
   // that don't pass it (e.g. 404.astro) keep getting both, as before.
   showsHeader?: boolean;
   showsFooter?: boolean;
+  // Site nav chrome (SiteHeader/SiteFooter/TocSidePanel). The /samples gallery
+  // turns it off so each sample tile shows only the book page itself.
+  showSiteChrome?: boolean;
 }
 
 const {
   title, currentPage = 1, answerKeyUrl, bookId = 'nfl', pageTitle, pageDescription,
   category, difficulty, actionContent, itemCount, pageType,
   tocEntries: tocEntriesProp, pagesSummary: pagesSummaryProp, totalPages: totalPagesProp,
-  showsHeader = true, showsFooter = true,
+  showsHeader = true, showsFooter = true, showSiteChrome = true,
 } = Astro.props as Props;
 
 const book = booksConfig[bookId];
@@ -64,21 +67,21 @@ const tocEntries = tocEntriesProp ?? (book ? buildToc(book.pages) : []);
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-cream text-ink font-body min-h-screen flex flex-col">
+<body class="bg-cream print:bg-white text-ink print:text-black font-body min-h-screen flex flex-col">
   <div id="app" class="flex flex-col flex-1 print:h-full">
-    <SiteHeader currentPage={currentPage} bookId={bookId} pages={pagesSummary} />
+    {showSiteChrome && <SiteHeader currentPage={currentPage} bookId={bookId} pages={pagesSummary} />}
     {showsHeader && (
       <PageHeader title={title} currentPage={currentPage} pageTitle={pageTitle} pageDescription={pageDescription} category={category} difficulty={difficulty} actionContent={actionContent} bookId={bookId} itemCount={itemCount} pageType={pageType} />
     )}
     <main class="flex-1 flex flex-col container mx-auto px-4 print:p-0 print:m-0 print:max-w-none print:justify-center">
       <slot />
     </main>
-    <SiteFooter currentPage={currentPage} totalPages={totalPages} />
+    {showSiteChrome && <SiteFooter currentPage={currentPage} totalPages={totalPages} />}
     {showsFooter && (
       <PageFooter currentPage={currentPage} answerKeyUrl={answerKeyUrl} />
     )}
   </div>
-  <TocSidePanel entries={tocEntries} bookId={bookId} currentPage={currentPage} />
+  {showSiteChrome && <TocSidePanel entries={tocEntries} bookId={bookId} currentPage={currentPage} />}
   
   <script define:vars={{ currentPage, totalPages, answerKeyUrl, bookId }}>
     window.bookAppConfig = {

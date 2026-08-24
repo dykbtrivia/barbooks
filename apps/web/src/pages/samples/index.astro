@@ -1,0 +1,271 @@
+---
+/**
+ * /samples/ — every page type at once.
+ *
+ * Each tile shows the sample's generated print output at 6x9 KDP trim — a
+ * raster of the actual PDF, not a screen render, since the PDF is the thing
+ * that ships. (It's the PNG rather than the PDF itself because Chrome's PDF
+ * viewer won't paint inside the scaled-down tiles; "Open PDF" gets you the
+ * real file.) Run `npm run samples-pdf` to regenerate.
+ *
+ * The "Live" toggle iframes the page itself instead — faster to iterate
+ * against, at the cost of showing screen CSS rather than print CSS.
+ */
+import '../../styles/global.css';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { samplePages, missingSampleTypes } from '../../utils/samplePages.js';
+import type { PageType } from '../../utils/pageTypes.js';
+
+const ALL_TYPES: PageType[] = ['list', 'matchup', 'teams', 'bracket', 'toc', 'text', 'custom'];
+const missing = missingSampleTypes(ALL_TYPES);
+
+// Tiles render at true page proportions and are scaled with a CSS transform,
+// so the iframe's internal layout sees a realistic viewport rather than a
+// squeezed one.
+const FRAME_W = 720;
+const FRAME_H = 1080; // 6:9
+
+// Checked at build/request time so the page can tell you to run the generator
+// instead of rendering a grid of broken PDF viewers.
+const PDF_DIR = join(process.cwd(), 'public', 'samples-pdf');
+const pdfStatus = samplePages.map((s) => ({
+  id: s.id,
+  hasPdf: existsSync(join(PDF_DIR, `${s.id}.pdf`)),
+  hasPng: existsSync(join(PDF_DIR, `${s.id}.png`)),
+}));
+const missingPdfs = pdfStatus.filter((p) => !p.hasPng).map((p) => p.id);
+const hasPdf = (id: string) => pdfStatus.find((p) => p.id === id)?.hasPdf ?? false;
+const hasPng = (id: string) => pdfStatus.find((p) => p.id === id)?.hasPng ?? false;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Type Samples</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-cream text-ink font-body min-h-screen">
+
+  <header class="bg-ink text-cream">
+    <div class="max-w-[1400px] mx-auto px-6 py-8">
+      <p class="font-mono uppercase text-red mb-3" style="font-size: 12px; letter-spacing: 0.4em;">Dev Tools</p>
+      <h1 class="font-display" style="font-size: 44px; line-height: 1;">PAGE TYPE SAMPLES</h1>
+      <p class="text-cream-dark mt-3 max-w-[640px]" style="font-size: 15px;">
+        One representative page per renderer, at 6&times;9 KDP trim. Tiles show
+        <strong>print output</strong> &mdash; rendered from the same
+        <code class="font-mono">page.pdf()</code> the book ships &mdash; so what you see is what prints,
+        margins and QR footer included. Regenerate with
+        <code class="font-mono">npm run samples-pdf -- --dev</code>. Fixtures live in
+        <code class="font-mono">src/utils/samplePages.ts</code>.
+      </p>
+      <div class="mt-6 flex flex-wrap items-center gap-4">
+        <div class="flex items-stretch border border-cream" role="group" aria-label="Tile source">
+          <button
+            id="view-pdf"
+            data-view="pdf"
+            class="view-btn font-mono uppercase px-4 py-2"
+            style="font-size: 12px; letter-spacing: 0.15em;"
+          >Print</button>
+          <button
+            id="view-live"
+            data-view="live"
+            class="view-btn font-mono uppercase px-4 py-2 border-l border-cream"
+            style="font-size: 12px; letter-spacing: 0.15em;"
+          >Live</button>
+        </div>
+        <label class="font-mono uppercase flex items-center gap-3" style="font-size: 12px; letter-spacing: 0.15em;">
+          Zoom
+          <input id="zoom" type="range" min="20" max="100" value="42" class="align-middle">
+          <span id="zoom-val" class="text-cream-dark">42%</span>
+        </label>
+        <button id="reload-all" class="font-mono uppercase border border-cream px-4 py-2" style="font-size: 12px; letter-spacing: 0.15em;">
+          Reload all
+        </button>
+      </div>
+    </div>
+  </header>
+
+  {missing.length > 0 && (
+    <div class="bg-red text-cream">
+      <div class="max-w-[1400px] mx-auto px-6 py-3 font-mono" style="font-size: 13px;">
+        No sample for: {missing.join(', ')} — add one to <code>samplePages.ts</code>.
+      </div>
+    </div>
+  )}
+
+  {missingPdfs.length > 0 && (
+    <div class="bg-ink text-cream border-t border-cream-dark">
+      <div class="max-w-[1400px] mx-auto px-6 py-3 font-mono" style="font-size: 13px;">
+        No PDF yet for: {missingPdfs.join(', ')} — run <code>npm run samples-pdf</code>
+        (add <code>--dev</code> to use the dev server you already have running).
+        Those tiles fall back to the live page.
+      </div>
+    </div>
+  )}
+
+  <main class="max-w-[1400px] mx-auto px-6 py-10">
+    <div id="grid" class="flex flex-wrap gap-10 items-start">
+      {samplePages.map((sample) => (
+        <figure class="sample" data-id={sample.id}>
+          <div
+            class="sample-frame border-ink bg-white"
+            style={`border-width: 2.5px; width: ${FRAME_W}px; height: ${FRAME_H}px;`}
+          >
+            {/* Both sources are in the DOM; the toggle shows one. */}
+            {hasPng(sample.id) ? (
+              <img
+                class="tile-pdf"
+                src={`/samples-pdf/${sample.id}.png`}
+                alt={`Print output for ${sample.label}`}
+                width={FRAME_W}
+                height={FRAME_H}
+                style="display: block;"
+              />
+            ) : (
+              <div
+                class="tile-pdf flex items-center justify-center p-16 text-center font-mono"
+                style={`width: ${FRAME_W}px; height: ${FRAME_H}px; font-size: 22px;`}
+              >
+                No print output yet — run <code>npm run samples-pdf -- --dev</code>, then Reload all.
+              </div>
+            )}
+            <iframe
+              class="tile-live"
+              data-src={`/samples/${sample.id}/`}
+              title={sample.label}
+              loading="lazy"
+              width={FRAME_W}
+              height={FRAME_H}
+              style="border: 0; display: none;"
+            ></iframe>
+          </div>
+          <figcaption class="sample-caption pt-4">
+            <div class="flex items-baseline gap-3">
+              <span class="font-display" style="font-size: 22px;">{sample.label}</span>
+              <span class="font-mono uppercase text-mid" style="font-size: 11px; letter-spacing: 0.15em;">{sample.type}</span>
+            </div>
+            <p class="text-mid mt-1" style="font-size: 13px;">{sample.note}</p>
+            <div class="flex flex-wrap gap-4 mt-2">
+              {hasPdf(sample.id) && (
+                <a
+                  href={`/samples-pdf/${sample.id}.pdf`}
+                  target="_blank"
+                  rel="noopener"
+                  class="inline-block font-mono uppercase border-b border-red"
+                  style="font-size: 11px; letter-spacing: 0.15em;"
+                >Open PDF &rarr;</a>
+              )}
+              <a
+                href={`/samples/${sample.id}/`}
+                target="_blank"
+                rel="noopener"
+                class="inline-block font-mono uppercase border-b border-ink"
+                style="font-size: 11px; letter-spacing: 0.15em;"
+              >Open page &rarr;</a>
+            </div>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </main>
+
+  <style>
+    /* A scaled element still occupies its unscaled box in flow, so the figure's
+       footprint is set from JS alongside the scale. */
+    .sample-frame {
+      transform-origin: top left;
+      overflow: hidden;
+    }
+
+    .view-btn[aria-pressed="true"] {
+      background: var(--color-cream);
+      color: var(--color-ink);
+    }
+
+    input[type="range"] { width: 160px; }
+  </style>
+
+  <script>
+    const grid = document.getElementById('grid') as HTMLElement;
+    const zoom = document.getElementById('zoom') as HTMLInputElement;
+    const zoomVal = document.getElementById('zoom-val') as HTMLElement;
+    const reloadAll = document.getElementById('reload-all') as HTMLButtonElement;
+    const viewBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.view-btn'));
+
+    const FRAME_W = 720;
+    const FRAME_H = 1080;
+    const ZOOM_KEY = 'barbooks:samples:zoom';
+    const VIEW_KEY = 'barbooks:samples:view';
+
+    function applyScale(pct: number) {
+      const scale = pct / 100;
+      grid.querySelectorAll<HTMLElement>('.sample').forEach((fig) => {
+        const frame = fig.querySelector<HTMLElement>('.sample-frame');
+        if (!frame) return;
+        frame.style.transform = `scale(${scale})`;
+        // Pull the following content up over the space the unscaled box still
+        // reserves, and shrink the figure to the visual width.
+        frame.style.marginBottom = `${FRAME_H * scale - FRAME_H}px`;
+        fig.style.width = `${FRAME_W * scale}px`;
+      });
+      zoomVal.textContent = `${pct}%`;
+    }
+
+    function applyView(view: 'pdf' | 'live') {
+      viewBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+
+      grid.querySelectorAll<HTMLElement>('.tile-pdf').forEach((el) => {
+        el.style.display = view === 'pdf' ? 'block' : 'none';
+      });
+
+      grid.querySelectorAll<HTMLIFrameElement>('.tile-live').forEach((el) => {
+        el.style.display = view === 'live' ? 'block' : 'none';
+        // Live frames load on first switch only — no point paying for ten
+        // page loads when the default view is the PDF.
+        if (view === 'live' && !el.src && el.dataset.src) el.src = el.dataset.src;
+      });
+
+      try { localStorage.setItem(VIEW_KEY, view); } catch { /* ignore */ }
+    }
+
+    try {
+      const savedZoom = localStorage.getItem(ZOOM_KEY);
+      if (savedZoom) zoom.value = savedZoom;
+    } catch { /* storage unavailable — fall back to the default */ }
+
+    let savedView: string | null = null;
+    try { savedView = localStorage.getItem(VIEW_KEY); } catch { /* ignore */ }
+
+    applyScale(Number(zoom.value));
+    applyView(savedView === 'live' ? 'live' : 'pdf');
+
+    zoom.addEventListener('input', () => {
+      applyScale(Number(zoom.value));
+      try { localStorage.setItem(ZOOM_KEY, zoom.value); } catch { /* ignore */ }
+    });
+
+    viewBtns.forEach((btn) => {
+      btn.addEventListener('click', () => applyView(btn.dataset.view === 'live' ? 'live' : 'pdf'));
+    });
+
+    reloadAll.addEventListener('click', () => {
+      // Cache-bust so a freshly regenerated PDF actually shows.
+      const stamp = Date.now();
+      grid.querySelectorAll<HTMLImageElement>('img.tile-pdf').forEach((el) => {
+        const base = el.src.split('?')[0];
+        el.src = `${base}?t=${stamp}`;
+      });
+      grid.querySelectorAll<HTMLIFrameElement>('.tile-live').forEach((el) => {
+        if (el.src) el.src = el.src;
+      });
+    });
+  </script>
+
+</body>
+</html>
