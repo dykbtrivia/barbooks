@@ -1,5 +1,120 @@
 ---
 import '../styles/global.css';
+
+const site = 'https://dykbtrivia.com';
+const canonical = new URL('/', site).href;
+const ogImage = new URL('/og-image.png', site).href;
+
+const title = 'Do You Know Ball? NFL Football Trivia Book | DYKB Trivia';
+const description =
+  'Do You Know Ball? (DYKB) is a collaborative NFL football trivia book you play with friends — list, matchup and bracket questions with QR-code answer keys that stay current. A great gift for men, dads and sports fans.';
+
+const faqs = [
+  {
+    q: 'What is Do You Know Ball? (DYKB) Trivia?',
+    a: 'Do You Know Ball? is a printed NFL football trivia book built for playing with other people. Instead of single-answer gotcha questions, every page is a challenge you fill out together — name the last 25 Super Bowl MVPs, match up famous games, or fill in a playoff bracket. Answer keys live online behind a QR code, so they never go stale.',
+  },
+  {
+    q: 'How do you play the DYKB football trivia game?',
+    a: 'Pick a page, write your answers on the lines, then scan the QR code at the bottom of the page to load the answer key and tally your score. Play solo against your own best score, or hand the phone to a friend who reads the questions aloud, gives hints and keeps score.',
+  },
+  {
+    q: 'Is this a good gift for sports fans?',
+    a: 'Yes — it is one of the easiest gifts for men, dads, boyfriends, husbands and football fans who are hard to shop for. It works as a Father’s Day gift, birthday gift, Christmas gift or stocking stuffer, and it earns its keep at tailgates, on road trips, at the bar and during commercial breaks.',
+  },
+  {
+    q: 'Do I need a phone or an app to play?',
+    a: 'No app required. The book is pen-and-paper trivia; a phone is only used to scan the QR code when you want to check answers. One phone for the whole table is plenty.',
+  },
+  {
+    q: 'What kind of NFL trivia questions are in the book?',
+    a: 'Questions span quarterbacks, Super Bowls, MVPs, records, drafts, coaches, franchise history and team-by-team leaders, across easy, medium and hard difficulty levels — so casual fans and diehards can play the same page.',
+  },
+  {
+    q: 'Are the answers kept up to date?',
+    a: 'Yes. Answer keys are hosted online rather than printed in the back of the book, so as rosters change and records break the answers you scan stay current.',
+  },
+  {
+    q: 'Are other sports coming after football?',
+    a: 'NFL football is the first edition. NBA basketball and other sports trivia editions are planned as future volumes.',
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${site}/#organization`,
+      name: 'DYKB Trivia',
+      alternateName: 'Do You Know Ball? Trivia',
+      url: site,
+      logo: ogImage,
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${site}/#website`,
+      url: site,
+      name: 'Do You Know Ball? (DYKB) Trivia',
+      description,
+      publisher: { '@id': `${site}/#organization` },
+      inLanguage: 'en-US',
+    },
+    {
+      '@type': 'Book',
+      '@id': `${site}/#book`,
+      name: 'Do You Know Ball? Trivia — Pro Football Edition',
+      alternateName: 'DYKB Trivia: NFL Football Trivia Book',
+      bookFormat: 'https://schema.org/Paperback',
+      inLanguage: 'en-US',
+      genre: ['Sports Trivia', 'Games & Activities', 'Football'],
+      about: ['NFL trivia', 'football trivia', 'sports trivia', 'party games'],
+      keywords:
+        'NFL trivia book, football trivia book, sports trivia game, do you know ball, trivia gifts for men, gifts for football fans',
+      description,
+      image: ogImage,
+      url: canonical,
+      publisher: { '@id': `${site}/#organization` },
+      isPartOf: { '@id': `${site}/#website` },
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${site}/#faq`,
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+    {
+      '@type': 'HowTo',
+      '@id': `${site}/#howtoplay`,
+      name: 'How to play Do You Know Ball? football trivia',
+      description:
+        'Play the DYKB NFL trivia book in three steps: pick a challenge, write your answers, then scan the QR code to check the answer key.',
+      step: [
+        {
+          '@type': 'HowToStep',
+          position: 1,
+          name: 'Pick your challenge',
+          text: 'Each page has a category, a difficulty level and a set of football trivia questions ready to go. Flip to whatever catches your eye.',
+        },
+        {
+          '@type': 'HowToStep',
+          position: 2,
+          name: 'Answer up',
+          text: 'Write your guesses on the lines provided — or keep them in your head. No peeking until you are done.',
+        },
+        {
+          '@type': 'HowToStep',
+          position: 3,
+          name: 'Scan and score',
+          text: 'Point your phone at the QR code. The answer key loads instantly. Check your work and tally your score.',
+        },
+      ],
+    },
+  ],
+};
 ---
 
 <!DOCTYPE html>
@@ -7,16 +122,42 @@ import '../styles/global.css';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>(DYKB) Trivia — Pro Football Edition</title>
-  <meta name="description" content="Not your typical trivia night. Do You Know Ball? is a collaborative sports trivia book — no single-answer gotcha questions, just lists you fill out, debate, and argue over. Grab the book, grab a friend, and see who really knows ball.">
+
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <link rel="canonical" href={canonical}>
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="theme-color" content="#1a1a1a">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Do You Know Ball? (DYKB) Trivia">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content={canonical}>
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+  <meta property="og:image" content={ogImage}>
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Do You Know Ball? — the NFL football trivia book you play with friends">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={title}>
+  <meta name="twitter:description" content={description}>
+  <meta name="twitter:image" content={ogImage}>
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json" set:html={JSON.stringify(schema)}></script>
 </head>
 <body class="bg-cream text-ink font-body">
 
   <!-- 1. Hero -->
-  <section class="relative overflow-hidden bg-ink text-cream">
+  <header class="relative overflow-hidden bg-ink text-cream">
     <div
       class="pointer-events-none absolute inset-0 opacity-[0.04]"
       style="background-image: repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 1px, transparent 12px);"
@@ -29,36 +170,52 @@ import '../styles/global.css';
 
     <div class="relative max-w-[960px] mx-auto px-6 sm:px-10 pt-20 pb-24 sm:pt-24 sm:pb-28">
       <p class="font-mono uppercase text-red mb-6" style="font-size: 13px; letter-spacing: 0.5em;">
-        Pro Football Edition
+        (DYKB) Trivia · Pro Football Edition
       </p>
-      <h1 class="font-display mb-6" style="font-size: clamp(48px, 9vw, 96px); line-height: 0.88;">
-        (DYKB) TRIVIA
+      <h1 class="font-display mb-6" style="font-size: clamp(44px, 8.5vw, 92px); line-height: 0.88;">
+        DO YOU KNOW BALL?
       </h1>
       <div class="bg-red mb-6" style="width: 80px; height: 4px;"></div>
-      <p class="max-w-[480px] text-cream-dark" style="font-size: 18px;">
-        Not your typical trivia night. No single-answer gotcha questions — every challenge is a list you fill
-        out, debate, and argue over. Grab the book, grab a friend, and see who really knows ball.
+      <p class="max-w-[560px] text-cream-dark mb-4" style="font-size: 20px;">
+        The <strong class="text-cream">NFL football trivia book</strong> you play with friends.
       </p>
+      <p class="max-w-[560px] text-cream-dark" style="font-size: 18px;">
+        Not your typical trivia night. No single-answer gotcha questions — every sports trivia challenge is a
+        list you fill out, debate and argue over. Grab the book, grab a friend, and settle who really knows
+        ball.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 mt-9">
+        <a href="#get-the-book" class="bg-red hover:bg-red-dark text-cream font-display px-10 py-4 text-center" style="font-size: 20px;">
+          GET THE BOOK
+        </a>
+        <a href="#how-to-play" class="border border-cream text-cream font-display px-10 py-4 text-center" style="font-size: 20px;">
+          HOW IT WORKS
+        </a>
+      </div>
     </div>
-  </section>
+  </header>
+
+  <main>
 
   <!-- 2. Selling Points Banner -->
-  <section class="bg-red text-cream">
+  <section class="bg-red text-cream" aria-label="Why DYKB football trivia is different">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-12 grid gap-10 sm:grid-cols-3 text-center">
       <div>
-        <h3 class="font-display mb-2" style="font-size: 20px;">IN-PERSON FUN</h3>
+        <h2 class="font-display mb-2" style="font-size: 20px;">IN-PERSON FUN</h2>
         <p class="opacity-85" style="font-size: 14px;">
-          Put down the phone. This is face-to-face, pen-in-hand trivia you can play anywhere.
+          Put down the phone. This is face-to-face, pen-in-hand football trivia you can play anywhere — the
+          bar, the tailgate, the couch, the road trip.
         </p>
       </div>
       <div>
-        <h3 class="font-display mb-2" style="font-size: 20px;">MORE THAN ONE ANSWER</h3>
+        <h2 class="font-display mb-2" style="font-size: 20px;">MORE THAN ONE ANSWER</h2>
         <p class="opacity-85" style="font-size: 14px;">
-          Lists, matchups, and brackets — not just "who did it first?" Every question is a conversation.
+          Lists, matchups and brackets — not just "who did it first?" Every NFL trivia question is a
+          conversation.
         </p>
       </div>
       <div>
-        <h3 class="font-display mb-2" style="font-size: 20px;">ALWAYS CURRENT</h3>
+        <h2 class="font-display mb-2" style="font-size: 20px;">ALWAYS CURRENT</h2>
         <p class="opacity-85" style="font-size: 14px;">
           Scan the QR code for answer keys that update with every roster move and record broken.
         </p>
@@ -67,14 +224,14 @@ import '../styles/global.css';
   </section>
 
   <!-- 3. How to Play — 3 Steps -->
-  <section class="bg-cream">
+  <section id="how-to-play" class="bg-cream scroll-mt-8">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20">
       <p class="font-mono uppercase text-red mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
         The Playbook
       </p>
       <h2 class="font-display mb-3" style="font-size: 44px;">HOW TO PLAY</h2>
       <p class="text-mid mb-12" style="font-size: 15px;">
-        Everything you need to get started — three steps and you're in.
+        Everything you need to start playing Do You Know Ball? — three steps and you're in.
       </p>
 
       <div class="flex flex-col md:flex-row gap-10 md:gap-8">
@@ -88,8 +245,8 @@ import '../styles/global.css';
             Pick Your Challenge
           </h3>
           <p class="text-mid" style="font-size: 15px;">
-            Each page has a category, difficulty level, and a set of questions ready to go. Flip to whatever
-            catches your eye.
+            Each page has a category, difficulty level, and a set of football trivia questions ready to go.
+            Flip to whatever catches your eye.
           </p>
         </div>
         <div class="relative flex-1">
@@ -123,10 +280,46 @@ import '../styles/global.css';
     </div>
   </section>
 
-  <!-- 4. Always Up to Date -->
+  <!-- 4. What's Inside -->
+  <section id="whats-inside" class="bg-cream border-t border-ink/10 scroll-mt-8">
+    <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20">
+      <p class="font-mono uppercase text-red mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
+        What's Inside
+      </p>
+      <h2 class="font-display mb-3" style="font-size: 44px;">NFL TRIVIA QUESTIONS, EVERY WHICH WAY</h2>
+      <p class="text-mid mb-10 max-w-[640px]" style="font-size: 15px;">
+        Pages of pro football trivia spanning quarterbacks, Super Bowls, MVPs, records, drafts, coaches and
+        franchise history — sorted by category and difficulty so casual fans and diehards can play the same
+        page.
+      </p>
+
+      <div class="grid gap-6 sm:grid-cols-3">
+        <div class="border-ink px-7 py-8" style="border-width: 2.5px;">
+          <h3 class="font-display mb-2" style="font-size: 26px;">LISTS</h3>
+          <p class="text-mid" style="font-size: 15px;">
+            "Name the last 25 Super Bowl MVPs." Fill-in-the-blank lists with year and rank clues.
+          </p>
+        </div>
+        <div class="border-ink px-7 py-8" style="border-width: 2.5px;">
+          <h3 class="font-display mb-2" style="font-size: 26px;">MATCHUPS</h3>
+          <p class="text-mid" style="font-size: 15px;">
+            Head-to-head football trivia — famous games, final scores, who beat who.
+          </p>
+        </div>
+        <div class="border-ink px-7 py-8" style="border-width: 2.5px;">
+          <h3 class="font-display mb-2" style="font-size: 26px;">BRACKETS</h3>
+          <p class="text-mid" style="font-size: 15px;">
+            Fill in a whole playoff bracket from memory. Harder than it sounds.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Always Up to Date -->
   <section class="bg-ink text-cream">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20 flex flex-col md:flex-row items-center gap-12 md:gap-[60px]">
-      <svg width="160" height="160" viewBox="0 0 160 160" fill="none" class="flex-shrink-0" aria-hidden="true">
+      <svg width="160" height="160" viewBox="0 0 160 160" fill="none" class="flex-shrink-0" role="img" aria-label="Illustration of a phone scanning a QR code answer key">
         <rect x="40" y="8" width="80" height="144" rx="12" stroke="var(--color-cream-dark)" stroke-width="2.5" fill="none"/>
         <rect x="56" y="28" width="48" height="48" fill="var(--color-cream)" opacity="0.08"/>
         <rect x="62" y="34" width="8" height="8" fill="var(--color-cream-dark)"/>
@@ -149,13 +342,13 @@ import '../styles/global.css';
         <h2 class="font-display mb-4" style="font-size: 36px;">ANSWERS THAT STAY CURRENT</h2>
         <p class="text-cream-dark max-w-[520px]" style="font-size: 17px;">
           Answer keys live online, so they're never out of date. Rosters change, records break, stats update —
-          your answers stay current. Just scan and check.
+          your answers stay current. Just scan and check. No app to download.
         </p>
       </div>
     </div>
   </section>
 
-  <!-- 5. Play Your Way -->
+  <!-- 6. Play Your Way -->
   <section class="bg-cream">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20">
       <p class="font-mono uppercase text-red mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
@@ -220,7 +413,7 @@ import '../styles/global.css';
     </div>
   </section>
 
-  <!-- 6. Spice It Up -->
+  <!-- 7. Spice It Up -->
   <section class="bg-red text-cream">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20">
       <p class="font-mono uppercase opacity-70 mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
@@ -251,12 +444,79 @@ import '../styles/global.css';
     </div>
   </section>
 
-  <!-- 7. CTA Footer -->
-  <section class="bg-ink text-cream">
+  <!-- 8. Gift angle -->
+  <section id="gift-guide" class="bg-cream scroll-mt-8">
+    <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 sm:py-20">
+      <p class="font-mono uppercase text-red mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
+        Gift Guide
+      </p>
+      <h2 class="font-display mb-4" style="font-size: 44px;">THE GIFT FOR SPORTS FANS WHO HAVE EVERYTHING</h2>
+      <p class="text-mid mb-10 max-w-[680px]" style="font-size: 16px;">
+        If you're hunting for gifts for men, gifts for football fans, or something better than another jersey,
+        this is it. Do You Know Ball? is a sports trivia book that actually gets used — it starts arguments at
+        the bar, kills time on road trips, and gives the guy who has everything something to do with his hands
+        during commercial breaks. Under-$30 gift, no batteries, no app, no assembly.
+      </p>
+
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="border-ink px-6 py-7" style="border-width: 2.5px;">
+          <h3 class="font-display mb-2" style="font-size: 22px;">FOR DAD</h3>
+          <p class="text-mid" style="font-size: 14px;">
+            A Father's Day or birthday gift for the dad who swears he remembers every Super Bowl. Now he can
+            prove it.
+          </p>
+        </div>
+        <div class="border-ink px-6 py-7" style="border-width: 2.5px;">
+          <h3 class="font-display mb-2" style="font-size: 22px;">STOCKING STUFFER</h3>
+          <p class="text-mid" style="font-size: 14px;">
+            A Christmas gift for football fans that fits in a stocking and outlasts the holidays.
+          </p>
+        </div>
+        <div class="border-ink px-6 py-7" style="border-width: 2.5px;">
+          <h3 class="font-display mb-2" style="font-size: 22px;">FANTASY LEAGUE</h3>
+          <p class="text-mid" style="font-size: 14px;">
+            Draft-night entertainment, last-place punishment, or a league prize nobody expects.
+          </p>
+        </div>
+        <div class="border-ink px-6 py-7" style="border-width: 2.5px;">
+          <h3 class="font-display mb-2" style="font-size: 22px;">TAILGATE &amp; BAR</h3>
+          <p class="text-mid" style="font-size: 14px;">
+            Toss it in the cooler bag. Pen-and-paper trivia beats staring at your phone in a crowded bar.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. FAQ -->
+  <section id="faq" class="bg-cream border-t border-ink/10 scroll-mt-8">
+    <div class="max-w-[820px] mx-auto px-6 sm:px-10 py-16 sm:py-20">
+      <p class="font-mono uppercase text-red mb-3" style="font-size: 12px; letter-spacing: 0.4em;">
+        Questions
+      </p>
+      <h2 class="font-display mb-10" style="font-size: 44px;">FREQUENTLY ASKED QUESTIONS</h2>
+
+      <div class="divide-y divide-ink/15 border-y border-ink/15">
+        {faqs.map((faq) => (
+          <details class="group py-5">
+            <summary class="cursor-pointer list-none flex items-start justify-between gap-6 font-display" style="font-size: 21px;">
+              <h3 class="font-display" style="font-size: 21px;">{faq.q}</h3>
+              <span class="text-red flex-shrink-0 select-none transition-transform group-open:rotate-45" style="font-size: 26px; line-height: 1;" aria-hidden="true">+</span>
+            </summary>
+            <p class="text-mid mt-3 pr-10" style="font-size: 15px;">{faq.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. CTA -->
+  <section id="get-the-book" class="bg-ink text-cream scroll-mt-8">
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 text-center flex flex-col items-center">
       <h2 class="font-display mb-4" style="font-size: 48px;">READY TO PLAY?</h2>
-      <p class="text-cream-dark max-w-[480px] mb-8" style="font-size: 17px;">
-        Pick up your copy of Do You Know Ball? and put your pro football knowledge to the test.
+      <p class="text-cream-dark max-w-[520px] mb-8" style="font-size: 17px;">
+        Pick up your copy of Do You Know Ball? — the NFL trivia book for football fans — and put your pro
+        football knowledge to the test.
       </p>
       <div class="flex flex-col sm:flex-row gap-4 mb-10">
         <a href="#" class="bg-red hover:bg-red-dark text-cream font-display px-10 py-4" style="font-size: 20px;">
@@ -266,11 +526,28 @@ import '../styles/global.css';
           LEARN MORE
         </a>
       </div>
+    </div>
+  </section>
+
+  </main>
+
+  <footer class="bg-ink text-cream border-t border-cream/10">
+    <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-10 text-center">
+      <p class="text-cream-dark mb-4" style="font-size: 14px;">
+        Do You Know Ball? (DYKB) Trivia — a collaborative sports trivia book series. Pro Football Edition out
+        now; NBA basketball and more sports editions on the way.
+      </p>
+      <nav aria-label="Footer" class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 font-mono uppercase" style="font-size: 12px; letter-spacing: 0.15em;">
+        <a class="hover:text-red" href="#how-to-play">How to Play</a>
+        <a class="hover:text-red" href="#whats-inside">What's Inside</a>
+        <a class="hover:text-red" href="#gift-guide">Gift Guide</a>
+        <a class="hover:text-red" href="#faq">FAQ</a>
+      </nav>
       <p class="font-mono opacity-50" style="font-size: 12px;">
         (DYKB) TRIVIA · Pro Football Edition
       </p>
     </div>
-  </section>
+  </footer>
 
 </body>
 </html>

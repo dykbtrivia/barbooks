@@ -8,6 +8,7 @@
     "deploy:worker": "cd apps/worker && npx wrangler deploy",
     "sync-pages": "cd apps/web && npm run sync-pages",
     "generate-pdf": "cd apps/web && npm run generate-pdf",
-    "samples-pdf": "cd apps/web && npm run samples-pdf"
+    "samples-pdf": "cd apps/web && npm run samples-pdf",
+    "og-image": "cd apps/web && npm run og-image"
   }
 }
