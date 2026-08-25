@@ -1,4 +1,8 @@
 User-agent: *
+Allow: /
 Disallow: /nfl/
 Disallow: /nba/
-Allow: /
+Disallow: /samples/
+Disallow: /answers/
+
+Sitemap: https://dykbtrivia.com/sitemap.xml
