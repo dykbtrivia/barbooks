@@ -44,7 +44,7 @@ const html = `<!DOCTYPE html>
   <div class="kicker">(DYKB) Trivia &middot; Pro Football Edition</div>
   <h1>DO YOU KNOW BALL?</h1>
   <div class="rule"></div>
-  <p>The NFL football trivia book you play with friends.</p>
+  <p>The pro football trivia book you play with friends.</p>
 </body></html>`;
 
 const browser = await puppeteer.launch();

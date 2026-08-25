@@ -5,14 +5,14 @@ const site = 'https://dykbtrivia.com';
 const canonical = new URL('/', site).href;
 const ogImage = new URL('/og-image.png', site).href;
 
-const title = 'Do You Know Ball? NFL Football Trivia Book | DYKB Trivia';
+const title = 'Do You Know Ball? Pro Football Trivia Book | DYKB Trivia';
 const description =
-  'Do You Know Ball? (DYKB) is a collaborative NFL football trivia book you play with friends — list, matchup and bracket questions with QR-code answer keys that stay current. A great gift for men, dads and sports fans.';
+  'Do You Know Ball? (DYKB) is a collaborative pro football trivia book you play with friends — list, matchup and bracket questions on the NFL, with QR-code answer keys that stay current. A great gift for men, dads and sports fans.';
 
 const faqs = [
   {
     q: 'What is Do You Know Ball? (DYKB) Trivia?',
-    a: 'Do You Know Ball? is a printed NFL football trivia book built for playing with other people. Instead of single-answer gotcha questions, every page is a challenge you fill out together — name the last 25 Super Bowl MVPs, match up famous games, or fill in a playoff bracket. Answer keys live online behind a QR code, so they never go stale.',
+    a: 'Do You Know Ball? is a printed pro football trivia book built for playing with other people. Instead of single-answer gotcha questions, every page is a challenge you fill out together — name the last 25 Super Bowl MVPs, match up famous games, or fill in a playoff bracket. Answer keys live online behind a QR code, so they never go stale.',
   },
   {
     q: 'How do you play the DYKB football trivia game?',
@@ -36,7 +36,7 @@ const faqs = [
   },
   {
     q: 'Are other sports coming after football?',
-    a: 'NFL football is the first edition. NBA basketball and other sports trivia editions are planned as future volumes.',
+    a: 'Pro football is the first edition. Basketball and other sports trivia editions are planned as future volumes.',
   },
 ];
 
@@ -64,13 +64,13 @@ const schema = {
       '@type': 'Book',
       '@id': `${site}/#book`,
       name: 'Do You Know Ball? Trivia — Pro Football Edition',
-      alternateName: 'DYKB Trivia: NFL Football Trivia Book',
+      alternateName: 'DYKB Trivia: Pro Football Trivia Book',
       bookFormat: 'https://schema.org/Paperback',
       inLanguage: 'en-US',
       genre: ['Sports Trivia', 'Games & Activities', 'Football'],
       about: ['NFL trivia', 'football trivia', 'sports trivia', 'party games'],
       keywords:
-        'NFL trivia book, football trivia book, sports trivia game, do you know ball, trivia gifts for men, gifts for football fans',
+        'NFL trivia, pro football trivia, football trivia book, sports trivia game, do you know ball, trivia gifts for men, gifts for football fans',
       description,
       image: ogImage,
       url: canonical,
@@ -91,7 +91,7 @@ const schema = {
       '@id': `${site}/#howtoplay`,
       name: 'How to play Do You Know Ball? football trivia',
       description:
-        'Play the DYKB NFL trivia book in three steps: pick a challenge, write your answers, then scan the QR code to check the answer key.',
+        'Play the DYKB pro football trivia book in three steps: pick a challenge, write your answers, then scan the QR code to check the answer key.',
       step: [
         {
           '@type': 'HowToStep',
@@ -139,7 +139,7 @@ const schema = {
   <meta property="og:image" content={ogImage}>
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Do You Know Ball? — the NFL football trivia book you play with friends">
+  <meta property="og:image:alt" content="Do You Know Ball? — the pro football trivia book you play with friends">
 
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image">
@@ -177,10 +177,10 @@ const schema = {
       </h1>
       <div class="bg-red mb-6" style="width: 80px; height: 4px;"></div>
       <p class="max-w-[560px] text-cream-dark mb-4" style="font-size: 20px;">
-        The <strong class="text-cream">NFL football trivia book</strong> you play with friends.
+        The <strong class="text-cream">pro football trivia book</strong> you play with friends.
       </p>
       <p class="max-w-[560px] text-cream-dark" style="font-size: 18px;">
-        Not your typical trivia night. No single-answer gotcha questions — every sports trivia challenge is a
+        Not your typical trivia night. No single-answer gotcha questions — every NFL trivia challenge is a
         list you fill out, debate and argue over. Grab the book, grab a friend, and settle who really knows
         ball.
       </p>
@@ -515,7 +515,7 @@ const schema = {
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-16 text-center flex flex-col items-center">
       <h2 class="font-display mb-4" style="font-size: 48px;">READY TO PLAY?</h2>
       <p class="text-cream-dark max-w-[520px] mb-8" style="font-size: 17px;">
-        Pick up your copy of Do You Know Ball? — the NFL trivia book for football fans — and put your pro
+        Pick up your copy of Do You Know Ball? — the pro football trivia book for NFL diehards — and put your
         football knowledge to the test.
       </p>
       <div class="flex flex-col sm:flex-row gap-4 mb-10">
@@ -535,7 +535,7 @@ const schema = {
     <div class="max-w-[960px] mx-auto px-6 sm:px-10 py-10 text-center">
       <p class="text-cream-dark mb-4" style="font-size: 14px;">
         Do You Know Ball? (DYKB) Trivia — a collaborative sports trivia book series. Pro Football Edition out
-        now; NBA basketball and more sports editions on the way.
+        now; basketball and more sports editions on the way.
       </p>
       <nav aria-label="Footer" class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 font-mono uppercase" style="font-size: 12px; letter-spacing: 0.15em;">
         <a class="hover:text-red" href="#how-to-play">How to Play</a>
@@ -543,8 +543,13 @@ const schema = {
         <a class="hover:text-red" href="#gift-guide">Gift Guide</a>
         <a class="hover:text-red" href="#faq">FAQ</a>
       </nav>
-      <p class="font-mono opacity-50" style="font-size: 12px;">
+      <p class="font-mono opacity-50 mb-4" style="font-size: 12px;">
         (DYKB) TRIVIA · Pro Football Edition
+      </p>
+      <p class="text-cream-dark/60 max-w-[640px] mx-auto" style="font-size: 11px; line-height: 1.6;">
+        Not affiliated with, endorsed by, or sponsored by the National Football League. NFL, Super Bowl,
+        and all team names and logos are trademarks of their respective owners and are used here for
+        identification purposes only.
       </p>
     </div>
   </footer>
