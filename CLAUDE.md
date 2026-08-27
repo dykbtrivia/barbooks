@@ -370,3 +370,17 @@ npm run generate-pdf -- --book nfl --out ~/Desktop/nfl-draft.pdf
 ## Sub-Agent
 
 A dedicated Claude sub-agent is available at `.claude/agents/book-page-creator.md`. Use it when you need to add new pages — it understands the page type selection logic and `pageConfig.ts` conventions.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in Linear, accessed via the `mcp__claude_ai_Linear` MCP connector. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary (label name = role name): needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root, shared across `apps/web` and `apps/worker`. See `docs/agents/domain.md`.
