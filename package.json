@@ -3,6 +3,10 @@
   "private": true,
   "scripts": {
     "dev:web": "cd apps/web && npm run dev",
+    "install:scraper": "npm --prefix apps/scraper install",
+    "dev:scraper": "cd apps/scraper && npm run dev",
+    "start:scraper": "cd apps/scraper && npm start",
+    "test:scraper": "cd apps/scraper && npm test",
     "dev:worker": "cd apps/worker && npx wrangler dev",
     "build:web": "cd apps/web && npm run build",
     "deploy:worker": "cd apps/worker && npx wrangler deploy",

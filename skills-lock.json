@@ -67,6 +67,13 @@
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
       "computedHash": "2449db6ab1ded9581f69fcc56c1f64818112d05e271fd4c5da23c6523f9d3d9d"
     },
+    "openwebsearch": {
+      "source": "openwebsearch.ai",
+      "sourceUrl": "https://openwebsearch.ai",
+      "sourceType": "well-known",
+      "computedHash": "770079c240549ef3bebe48305f6cb69186bfc3722c239032f52c45fff614b141",
+      "wellKnownDigest": "sha256:6d0ffc6ff83e4dea0284fce7956074a72e92cdd64445c71f026d9948f7949f06"
+    },
     "prototype": {
       "source": "mattpocock/skills",
       "sourceType": "github",

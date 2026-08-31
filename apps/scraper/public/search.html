@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="description" content="Search the live web with Interfaze."><title>BarBooks Web Search</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/nav.css"></head>
+<body><main>
+  <header><a class="brand" href="/"><span class="brand-mark">B</span><span>BarBooks Lab</span></a><nav><a href="/">Scrape</a><a class="active" href="/search">Search</a></nav><span class="status"><i></i> Powered by Interfaze</span></header>
+  <section class="hero"><p class="eyebrow">LIVE WEB SEARCH</p><h1>Find what matters<br><em>across the web.</em></h1><p class="intro">Ask a focused question or enter a search phrase. Interfaze searches the live web and returns source-rich results.</p><form id="search-form"><label for="query">Search query</label><div class="url-field"><span aria-hidden="true">⌕</span><input id="query" name="query" type="search" placeholder="Latest NFL rule changes" autocomplete="off" maxlength="500" required><button type="submit">Search web <b aria-hidden="true">→</b></button></div><p class="hint">Specific queries usually produce stronger results.</p></form></section>
+  <section id="result-panel" class="result-panel" hidden aria-live="polite"><div class="result-heading"><div><p class="eyebrow">SEARCH RESULT</p><h2 id="result-title">Interfaze results</h2></div><div class="actions"><button id="copy-result" class="secondary" type="button">Copy JSON</button><button id="download-result" class="secondary" type="button">Download</button></div></div><pre id="result"></pre></section>
+  <section id="error-panel" class="error-panel" hidden aria-live="assertive"><strong>Couldn’t search the web</strong><p id="error-message"></p></section>
+</main><script type="module" src="/search.js"></script></body>
+</html>

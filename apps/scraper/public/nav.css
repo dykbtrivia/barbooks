@@ -1,0 +1,8 @@
+nav { display: flex; align-items: center; gap: 5px; padding: 4px; border: 1px solid #30352c; border-radius: 9px; background: #151813; }
+nav a { padding: 7px 12px; color: #8f9789; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 700; }
+nav a:hover, nav a.active { color: #edf2e7; background: #292e25; }
+
+@media (max-width: 640px) {
+  header .brand span:last-child { display: none; }
+  nav a { padding-inline: 10px; }
+}

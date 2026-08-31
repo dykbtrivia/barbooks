@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Extract structured content from any public web page with Interfaze.">
+  <title>BarBooks Web Scraper</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/nav.css">
+</head>
+<body><main>
+  <header><a class="brand" href="/"><span class="brand-mark">B</span><span>BarBooks Lab</span></a><nav><a class="active" href="/">Scrape</a><a href="/search">Search</a></nav><span class="status"><i></i> Powered by Interfaze</span></header>
+  <section class="hero">
+    <p class="eyebrow">WEB INTELLIGENCE TOOL</p><h1>Turn a web page into<br><em>useful data.</em></h1>
+    <p class="intro">Paste a public URL. Interfaze reads the page and returns its structured content—ready to inspect, copy, or download.</p>
+    <form id="scrape-form"><label for="url">Page URL</label><div class="url-field"><span aria-hidden="true">↗</span><input id="url" name="url" type="url" placeholder="https://example.com/page" autocomplete="url" required><button type="submit">Scrape page <b aria-hidden="true">→</b></button></div><p class="hint">Only public HTTP and HTTPS pages are supported.</p></form>
+  </section>
+  <section id="result-panel" class="result-panel" hidden aria-live="polite"><div class="result-heading"><div><p class="eyebrow">SCRAPE RESULT</p><h2 id="result-title">Structured output</h2></div><div class="actions"><button id="copy-result" class="secondary" type="button">Copy JSON</button><button id="download-result" class="secondary" type="button">Download</button></div></div><pre id="result"></pre></section>
+  <section id="error-panel" class="error-panel" hidden aria-live="assertive"><strong>Couldn’t scrape that page</strong><p id="error-message"></p></section>
+</main><script type="module" src="/app.js"></script></body>
+</html>

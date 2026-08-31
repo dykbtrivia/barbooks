@@ -39,6 +39,10 @@ barbooks/
 │   │           ├── pageConfig.ts        # Auto-generated page content (do not edit)
 │   │           └── excelToJson.ts       # Excel → pageConfig.ts sync pipeline (parse/order/codegen)
 │   │
+│   ├── scraper/                     # Interfaze-powered web scraper mini app
+│   │   ├── public/                  # Browser UI
+│   │   └── src/                     # Node server + Interfaze integration
+│   │
 │   └── worker/                      # Cloudflare Worker (QR redirect + analytics)
 │       ├── src/index.ts             # Request handler / router
 │       └── wrangler.toml            # Cloudflare config
@@ -73,6 +77,9 @@ All commands are run from the **repository root**:
 | Command | Description |
 |---|---|
 | `npm run dev:web` | Start the Astro dev server at `localhost:4321` |
+| `npm run install:scraper` | Install the scraper's Interfaze dependency |
+| `npm run dev:scraper` | Start the Interfaze scraper at `localhost:4174` |
+| `npm run test:scraper` | Run the scraper tests |
 | `npm run build:web` | Build the production site to `apps/web/dist/` |
 | `npm run sync-pages` | Regenerate `pageConfig.ts` from the Excel files |
 | `npm run generate-pdf` | Export a print-ready PDF for all books |
@@ -97,6 +104,18 @@ Playwright browser binaries must be installed before running PDF generation:
 ```sh
 npx playwright install chromium
 ```
+
+## Web scraper
+
+The scraper runs separately from the static book site so the Interfaze API key remains server-side.
+
+```sh
+npm run install:scraper
+export INTERFAZE_API_KEY="your-key"
+npm run dev:scraper
+```
+
+Open `http://localhost:4174` to scrape a public HTTP(S) URL, or open `http://localhost:4174/search` to search the live web. Both paths support inspecting, copying, and downloading the Interfaze result. API keys are available from the [Interfaze dashboard](https://interfaze.ai).
 
 ## Updating Content
 
