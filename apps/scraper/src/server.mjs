@@ -3,7 +3,10 @@ import { readFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Interfaze } from "interfaze";
+import { loadEnvironment } from "./env.mjs";
 import { scrapeUrl, searchWeb } from "./scrape.mjs";
+
+loadEnvironment(fileURLToPath(new URL("../../../.env", import.meta.url)));
 
 const publicDirectory = resolve(fileURLToPath(new URL("../public/", import.meta.url)));
 const port = Number.parseInt(process.env.PORT ?? "4174", 10);

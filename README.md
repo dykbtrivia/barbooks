@@ -111,11 +111,11 @@ The scraper runs separately from the static book site so the Interfaze API key r
 
 ```sh
 npm run install:scraper
-export INTERFAZE_API_KEY="your-key"
+printf 'INTERFAZE_API_KEY=your-key\n' > .env
 npm run dev:scraper
 ```
 
-Open `http://localhost:4174` to scrape a public HTTP(S) URL, or open `http://localhost:4174/search` to search the live web. Both paths support inspecting, copying, and downloading the Interfaze result. API keys are available from the [Interfaze dashboard](https://interfaze.ai).
+The `.env` file belongs in the repository root, alongside the root `package.json`. You can alternatively export `INTERFAZE_API_KEY` in the shell before starting the server. Open `http://localhost:4174` to scrape a public HTTP(S) URL, or open `http://localhost:4174/search` to search the live web. Both paths support inspecting, copying, and downloading the Interfaze result. API keys are available from the [Interfaze dashboard](https://interfaze.ai).
 
 ## Updating Content
 
