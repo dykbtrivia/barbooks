@@ -1,0 +1,98 @@
+---
+/**
+ * Copyright / legal page — back of the title page (page 2, left-facing). No
+ * PageHeader or PageFooter. Title/author/ISBN/year come from bookMetadata.ts;
+ * the ISBN line is omitted until one is filled in there.
+ */
+import type { BookMetadata } from '../../utils/bookMetadata.js';
+
+interface Props {
+  meta: BookMetadata;
+}
+
+const { meta } = Astro.props as Props;
+const fullTitle = meta.subtitle ? `${meta.title} ${meta.subtitle}` : meta.title;
+---
+
+<div class="copyright-page">
+  <div class="copyright-body">
+    <p class="copyright-title">{fullTitle}</p>
+
+    <p>&copy; {meta.copyrightYear} {meta.copyrightHolder}. All rights reserved.</p>
+
+    <p>
+      No part of this book may be reproduced, stored in a retrieval system, or transmitted in any form
+      or by any means &mdash; electronic, mechanical, photocopying, recording, or otherwise &mdash;
+      without prior written permission from the publisher, except for brief quotations in reviews.
+    </p>
+
+    <p>{meta.imprint ? `Published by ${meta.imprint}` : 'Independently published'}</p>
+
+    {meta.isbn && <p>ISBN: {meta.isbn}</p>}
+
+    <p>
+      NFL, NBA, MLB, NHL, and all team names are trademarks of their respective owners. This book is
+      not affiliated with, endorsed by, or sponsored by any league, team, or player.
+    </p>
+
+    <p>
+      Answers are accurate as of printing. Answer keys are hosted online via the QR codes in this book
+      and may be updated, changed, or discontinued at any time.
+    </p>
+
+    <p>For entertainment only &mdash; please drink responsibly.</p>
+
+    <p>dykbtrivia.com</p>
+  </div>
+</div>
+
+<style>
+  .copyright-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    /* Copyright pages conventionally sit their text at the bottom of the page. */
+    justify-content: flex-end;
+    min-height: 70vh;
+  }
+
+  @media print {
+    .copyright-page {
+      /* 9in page minus body's 0.5in top/bottom print padding (global.css). */
+      height: 8in;
+      min-height: 8in;
+    }
+  }
+
+  .copyright-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    line-height: 1.55;
+    color: #1a1a1a;
+  }
+
+  .copyright-body p {
+    margin: 0 0 9px;
+  }
+
+  .copyright-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .copyright-title {
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+  }
+
+  @media screen {
+    .copyright-body {
+      font-size: 14px;
+    }
+
+    .copyright-title {
+      font-size: 18px;
+    }
+  }
+</style>

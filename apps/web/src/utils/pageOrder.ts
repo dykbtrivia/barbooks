@@ -35,6 +35,12 @@ export const SUBCATEGORY_ORDER: string[] = [
 
 const CONTENT_TYPES = new Set(['list', 'matchup', 'teams', 'bracket']);
 
+// KDP layout: the title page must be right-facing (odd) with the copyright
+// page on its back, so these lead the book in exactly this order.
+const FRONT_MATTER_ORDER = ['title', 'copyright'];
+const BACK_MATTER_TYPES = new Set(['about']);
+const PINNED_TYPES = new Set(['toc', ...FRONT_MATTER_ORDER, ...BACK_MATTER_TYPES]);
+
 // Names in `order` sort by their position in that list (first = first);
 // anything not listed falls back to alphabetical, placed after every name
 // that IS listed. Blank/undefined always sorts last of all.
@@ -55,8 +61,10 @@ function makeOrderComparator(order: string[]) {
 
 // Reorders parsed pages so the book's physical layout matches what the TOC
 // promises: grouped by category, then subcategory within it, per
-// CATEGORY_ORDER/SUBCATEGORY_ORDER above. `toc` pages are pinned to the
-// front. `text`/`custom` pages aren't sorted independently — each stays
+// CATEGORY_ORDER/SUBCATEGORY_ORDER above. Book front matter is pinned to the
+// very front in FRONT_MATTER_ORDER (title page on page 1, a right-facing
+// page; copyright on page 2, its back), followed by `toc` pages. Back matter
+// (`about`) is pinned to the very end. `text`/`custom` pages aren't sorted independently — each stays
 // glued to its nearest neighboring content page (following, if it appears
 // before any content page in the sheet — front matter like a "How to Play"
 // page — otherwise the preceding one) and travels with it. Front-matter
@@ -65,8 +73,10 @@ function makeOrderComparator(order: string[]) {
 //
 // Returns pages in final order, each with a correct final answerKeyUrl.
 export function reorderPages(pages: PageConfig[], bookId: string): PageConfig[] {
+  const frontMatter = FRONT_MATTER_ORDER.flatMap(type => pages.filter(p => p.type === type));
   const tocPages = pages.filter(p => p.type === 'toc');
-  const rest = pages.filter(p => p.type !== 'toc');
+  const backMatter = pages.filter(p => BACK_MATTER_TYPES.has(p.type));
+  const rest = pages.filter(p => !PINNED_TYPES.has(p.type));
 
   interface Group { anchor: PageConfig; trailers: PageConfig[]; originalIndex: number; }
   const groups: Group[] = [];
@@ -86,7 +96,7 @@ export function reorderPages(pages: PageConfig[], bookId: string): PageConfig[] 
 
   let ordered: PageConfig[];
   if (groups.length === 0) {
-    ordered = [...tocPages, ...rest]; // no content pages — nothing to sort
+    ordered = [...frontMatter, ...tocPages, ...rest, ...backMatter]; // no content pages — nothing to sort
   } else {
     const compareCategory = makeOrderComparator(CATEGORY_ORDER);
     const compareSubcategory = makeOrderComparator(SUBCATEGORY_ORDER);
@@ -108,7 +118,7 @@ export function reorderPages(pages: PageConfig[], bookId: string): PageConfig[] 
     });
 
     const orderedRest = groups.flatMap(g => [g.anchor, ...g.trailers]);
-    ordered = [...tocPages, ...pendingLeaders, ...orderedRest];
+    ordered = [...frontMatter, ...tocPages, ...pendingLeaders, ...orderedRest, ...backMatter];
   }
 
   return ordered.map((page, i) => ({

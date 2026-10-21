@@ -1,0 +1,131 @@
+---
+/**
+ * About page — the book's back matter (last page). No PageHeader or
+ * PageFooter: the footer's QR is a per-page answer key, whereas this page's
+ * QR points at the website. Generated at build time, same as PageFooter.
+ */
+import QRCode from 'qrcode';
+import type { BookMetadata } from '../../utils/bookMetadata.js';
+
+interface Props {
+  meta: BookMetadata;
+}
+
+const { meta } = Astro.props as Props;
+
+const SITE_URL = 'https://dykbtrivia.com';
+const qrSvg = await QRCode.toString(SITE_URL, { type: 'svg', margin: 1, width: 96, color: { dark: '#000000', light: '#ffffff' } });
+---
+
+<div class="about-page">
+  <div>
+    <p class="about-kicker">About</p>
+    <h1 class="about-title">{meta.author}</h1>
+    <div class="about-rule"></div>
+
+    <p class="about-text">
+      {meta.title} is built for playing together &mdash; road trips, tailgates, bars, and living rooms.
+      Every page is an argument waiting to happen, and every answer key lives online so it stays current
+      as records fall and rosters move.
+    </p>
+
+    <h2 class="about-heading">Enjoyed the book?</h2>
+    <p class="about-text">
+      A quick review on Amazon is the single biggest help to a small, independent book like this one.
+      Tell other fans what you thought &mdash; and which page started the biggest argument.
+    </p>
+
+    <h2 class="about-heading">More to play</h2>
+    <p class="about-text">
+      New volumes, other sports, and updates live at dykbtrivia.com.
+    </p>
+  </div>
+
+  <div class="about-qr">
+    <Fragment set:html={qrSvg} />
+    <span>dykbtrivia.com</span>
+  </div>
+</div>
+
+<style>
+  .about-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 70vh;
+    padding-top: 0.5in;
+  }
+
+  @media print {
+    .about-page {
+      /* 9in page minus body's 0.5in top/bottom print padding (global.css). */
+      height: 8in;
+      min-height: 8in;
+    }
+  }
+
+  .about-kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #555;
+    margin: 0 0 8px;
+  }
+
+  .about-title {
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1;
+    color: #1a1a1a;
+    margin: 0;
+  }
+
+  .about-rule {
+    width: 64px;
+    border-top: 3px solid #1a1a1a;
+    margin: 18px 0 20px;
+  }
+
+  .about-heading {
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    color: #1a1a1a;
+    margin: 20px 0 6px;
+  }
+
+  .about-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    margin: 0;
+  }
+
+  .about-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .about-qr :global(svg) {
+    width: 72px;
+    height: 72px;
+    display: block;
+  }
+
+  .about-qr span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #1a1a1a;
+  }
+</style>

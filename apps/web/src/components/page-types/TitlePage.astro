@@ -1,0 +1,111 @@
+---
+/**
+ * Title page — first page of the book (right-facing). No PageHeader or
+ * PageFooter, so no page number. Every line comes from bookMetadata.ts so it
+ * stays in lockstep with the KDP title setup.
+ */
+import type { BookMetadata } from '../../utils/bookMetadata.js';
+
+interface Props {
+  meta: BookMetadata;
+}
+
+const { meta } = Astro.props as Props;
+---
+
+<div class="title-page">
+  <div class="title-block">
+    {meta.edition && <p class="title-edition">{meta.edition}</p>}
+    <h1 class="title-main">{meta.title}</h1>
+    <div class="title-rule"></div>
+    {meta.subtitle && <p class="title-subtitle">{meta.subtitle}</p>}
+  </div>
+
+  <div class="title-credit">
+    <p class="title-author">{meta.author}</p>
+    {meta.imprint && <p class="title-imprint">{meta.imprint}</p>}
+  </div>
+</div>
+
+<style>
+  .title-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    min-height: 70vh;
+    padding: 15% 0 8%;
+  }
+
+  @media print {
+    .title-page {
+      /* 9in page minus body's 0.5in top/bottom print padding (global.css). */
+      height: 8in;
+      min-height: 8in;
+      padding: 1.5in 0 0.5in;
+    }
+  }
+
+  .title-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title-edition {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #555;
+    margin: 0 0 18px;
+  }
+
+  .title-main {
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    font-weight: 400;
+    font-size: 64px;
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    color: #1a1a1a;
+    margin: 0;
+  }
+
+  .title-rule {
+    width: 96px;
+    border-top: 4px solid #1a1a1a;
+    margin: 24px 0;
+  }
+
+  .title-subtitle {
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    color: #1a1a1a;
+    margin: 0;
+  }
+
+  .title-author {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    margin: 0;
+  }
+
+  .title-imprint {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #555;
+    margin: 6px 0 0;
+  }
+</style>

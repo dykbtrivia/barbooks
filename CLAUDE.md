@@ -40,7 +40,12 @@ cd ../worker && npx wrangler kv bulk put --namespace-id <id> kv-seed.json
 | `bracket` | Playoff-bracket layout, clue style driven by `itemsNote`/column G | Fill-in-the-bracket pages |
 | `toc` | Auto-built table of contents, grouped by category/subcategory | Book's front-matter TOC page |
 | `text` | Plain paragraph content | Intro pages, rules, etc. |
+| `title` | KDP title page — front matter, always page 1 | Book title/subtitle/author |
+| `copyright` | KDP copyright/legal page — always page 2 (back of title) | ©, trademark disclaimer, ISBN |
+| `about` | Back matter — always the last page | About DYKB, review ask, website QR |
 | `custom` | Arbitrary HTML | Special layouts |
+
+`title`, `copyright`, `about`, and the "How to Play" `text` page are **synthesized** for every book in `buildBookPages.ts` (never authored in Excel) and pinned by `pageOrder.ts`: title (1) → copyright (2) → toc (3) → How to Play (4) → content → about (last). Their text comes from **`apps/web/src/utils/bookMetadata.ts`** at render time — title, subtitle, author, imprint, copyright year/holder, and ISBN. KDP requires these to **exactly match** the KDP title setup, so that file is the single source of truth; drop in the KDP-assigned ISBN there and rebuild (no `sync-pages` needed). None of the three get a `PageHeader`/`PageFooter` (no page number, per KDP front-matter convention).
 
 Every page type — its renderer component, the props it needs, and whether it gets a `PageHeader`/`PageFooter` — is registered in one place: `apps/web/src/utils/pageTypeRegistry.ts`.
 
@@ -128,6 +133,7 @@ barbooks/
 │   │           ├── pageOrder.ts         # Category/subcategory ordering + final answerKeyUrl assignment
 │   │           ├── pageConfigCodegen.ts # PageConfig[] → pageConfig.ts source text
 │   │           ├── samplePages.ts       # Fixtures for the /samples gallery (one per page type)
+│   │           ├── bookMetadata.ts      # Per-book KDP metadata (title/author/ISBN/©) for title/copyright/about pages
 │   │           ├── tocBuilder.ts        # Builds TOC entries from ordered pages
 │   │           └── pagesSummary.ts      # Builds the page list used by SiteHeader's page picker
 │   └── worker/
@@ -187,7 +193,7 @@ The sync pipeline is split across four files, each with one job:
 
 ### TypeScript Interfaces (`src/utils/pageTypes.ts`)
 
-Seven page configuration types are supported (see the full `PageType` union and interfaces in `pageTypes.ts`); the four most commonly authored are shown below:
+Ten page configuration types are supported (see the full `PageType` union and interfaces in `pageTypes.ts`); the four most commonly authored are shown below:
 
 ```typescript
 // List page — numbered quiz items with fill-in-the-blank blanks
@@ -270,6 +276,7 @@ Single source of truth for "what does this page type need to render": which comp
 | `page-types/Teams.astro` | One-item-per-team layout, keyed off `bookId`. |
 | `page-types/TextContent.astro` | Renders `text`/`custom` page HTML content (`set:html`). |
 | `page-types/TableOfContents.astro` | Renders the `toc` page from `tocBuilder.ts` entries. |
+| `page-types/TitlePage.astro` / `CopyrightPage.astro` / `AboutPage.astro` | Front/back matter, rendered from `bookMetadata.ts`. |
 | `PlayoffBracket.astro` | Renders `bracket` pages from `clueStyle`. |
 | `ActionContent.astro` | Absolutely-positioned orange badge with icon and rotated content. |
 | `Layout.astro` | Root HTML template; passes `bookAppConfig` to the `window` object for `bookApp.ts`. |

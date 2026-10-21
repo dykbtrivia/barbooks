@@ -90,4 +90,12 @@ export interface BracketPage {
   actionContent?: ActionContent;
 }
 
-export type PageConfig = ListPage | MatchupPage | TextPage | TeamsPage | BracketPage | TocPage;
+/** Title/copyright (front matter) and about (back matter) — synthesized in
+ *  buildBookPages.ts, never authored in Excel. Content comes from
+ *  bookMetadata.ts at render time, so only the type is carried. */
+export interface BookMatterPage {
+  type:          'title' | 'copyright' | 'about';
+  answerKeyUrl:  string;
+}
+
+export type PageConfig = ListPage | MatchupPage | TextPage | TeamsPage | BracketPage | TocPage | BookMatterPage;

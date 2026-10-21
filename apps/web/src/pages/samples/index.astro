@@ -17,7 +17,7 @@ import { join } from 'node:path';
 import { samplePages, missingSampleTypes } from '../../utils/samplePages.js';
 import type { PageType } from '../../utils/pageTypes.js';
 
-const ALL_TYPES: PageType[] = ['list', 'matchup', 'teams', 'bracket', 'toc', 'text', 'custom'];
+const ALL_TYPES: PageType[] = ['list', 'matchup', 'teams', 'bracket', 'toc', 'text', 'custom', 'title', 'copyright', 'about'];
 const missing = missingSampleTypes(ALL_TYPES);
 
 // Tiles render at true page proportions and are scaled with a CSS transform,
