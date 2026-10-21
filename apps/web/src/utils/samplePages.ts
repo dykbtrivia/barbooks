@@ -52,6 +52,22 @@ const ranks = (count: number) =>
 
 export const samplePages: SamplePage[] = [
   {
+    id: 'title',
+    type: 'title',
+    label: 'Title page',
+    note: 'Front matter, page 1 (right-facing). Content from bookMetadata.ts. No header, no footer, no page number.',
+    pageNum: 1,
+    config: { type: 'title' },
+  },
+  {
+    id: 'copyright',
+    type: 'copyright',
+    label: 'Copyright page',
+    note: 'Back of the title page (page 2). Legal text from bookMetadata.ts; ISBN line only once one is set.',
+    pageNum: 2,
+    config: { type: 'copyright' },
+  },
+  {
     id: 'list-years',
     type: 'list',
     label: 'List — year clues',
@@ -213,6 +229,14 @@ export const samplePages: SamplePage[] = [
 <ul><li>Arbitrary markup</li><li>Inline styles allowed</li><li>Still gets the print footer</li></ul>`,
       answerKeyUrl: 'https://dykbtrivia.com/answers/nfl/14',
     },
+  },
+  {
+    id: 'about',
+    type: 'about',
+    label: 'About (back matter)',
+    note: 'Last page of the book — about blurb, review ask, and a website QR. No header, no footer.',
+    pageNum: 96,
+    config: { type: 'about' },
   },
 ];
 

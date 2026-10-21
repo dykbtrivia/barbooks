@@ -1,4 +1,4 @@
-import type { PageConfiguration } from './pageTypes.js';
+import type { PageConfiguration, PageType } from './pageTypes.js';
 
 export interface TocCategoryEntry {
   name: string;
@@ -7,11 +7,14 @@ export interface TocCategoryEntry {
 
 const UNCATEGORISED = 'Uncategorised';
 
+// Pages that never get a TOC entry — front/back matter and prose pages.
+const NON_CONTENT_TYPES = new Set<PageType>(['text', 'custom', 'toc', 'title', 'copyright', 'about']);
+
 export function buildToc(pages: PageConfiguration[]): TocCategoryEntry[] {
   const startingPageByCategory = new Map<string, number>();
 
   pages.forEach((page, index) => {
-    if (page.type === 'text' || page.type === 'custom' || page.type === 'toc') return;
+    if (NON_CONTENT_TYPES.has(page.type)) return;
 
     const pageNum = index + 1;
     const category = ('category' in page && page.category) ? page.category : UNCATEGORISED;

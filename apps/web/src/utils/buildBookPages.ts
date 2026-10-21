@@ -3,7 +3,7 @@
  *
  * The single source of truth for "what is book X's final, ordered page
  * list" — reads the raw Excel rows, parses them, injects the synthesized
- * "How to Play" front-matter page, and reorders. Both excelToJson.ts (which
+ * front/back matter (title, copyright, "How to Play", about), and reorders. Both excelToJson.ts (which
  * generates pageConfig.ts) and scripts/seed-kv.ts (which seeds the Worker's
  * KV redirect table) call this, so the two can never derive different final
  * page numbers for the same book — that mismatch previously caused every
@@ -72,18 +72,21 @@ export function buildOrderedPages(book: BookSource): BuiltBook | null {
 
   const { pages, warnings } = parseBookPages(pagesRaw, matchupRaw, book.id);
 
-  // Every book gets the same "How to Play" front-matter page, synthesized
-  // here rather than authored per-book in Excel. reorderPages() pins it
-  // directly after the toc page(s), so it lands as page 2 (page 1 if
-  // there's no toc yet).
-  const howToPlayPage: PageConfig = {
-    type: 'text',
-    title: 'How to Play',
-    content: HOW_TO_PLAY_HTML,
-    answerKeyUrl: `https://dykbtrivia.com/answers/${book.id}/2`,
-  };
+  // Every book gets the same synthesized front/back matter rather than
+  // authoring it per-book in Excel: title + copyright pages (content from
+  // bookMetadata.ts at render time), a "How to Play" page, and an about page
+  // at the back. reorderPages() pins each into place — title on page 1,
+  // copyright on 2, toc on 3, How to Play on 4, about last — and stamps the
+  // final answerKeyUrl, so the placeholder URLs here are overwritten.
+  const placeholderUrl = `https://dykbtrivia.com/answers/${book.id}/0`;
+  const bookMatter: PageConfig[] = [
+    { type: 'title', answerKeyUrl: placeholderUrl },
+    { type: 'copyright', answerKeyUrl: placeholderUrl },
+    { type: 'text', title: 'How to Play', content: HOW_TO_PLAY_HTML, answerKeyUrl: placeholderUrl },
+    { type: 'about', answerKeyUrl: placeholderUrl },
+  ];
 
-  const ordered = reorderPages([howToPlayPage, ...pages], book.id);
+  const ordered = reorderPages([...bookMatter, ...pages], book.id);
 
   return { pages: ordered, warnings };
 }

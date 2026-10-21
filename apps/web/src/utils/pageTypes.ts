@@ -1,5 +1,5 @@
 // Define different page types
-export type PageType = 'list' | 'text' | 'custom' | 'matchup' | 'teams' | 'bracket' | 'toc';
+export type PageType = 'list' | 'text' | 'custom' | 'matchup' | 'teams' | 'bracket' | 'toc' | 'title' | 'copyright' | 'about';
 
 export interface ListItem {
   // Flexible clue - can be any string or number
@@ -102,7 +102,25 @@ export interface TocPageConfig {
   answerKeyUrl?: string;
 }
 
-export type PageConfiguration = ListPageConfig | TextPageConfig | CustomPageConfig | MatchupPageConfig | TeamsPageConfig | BracketPageConfig | TocPageConfig;
+// Front matter (title, copyright) and back matter (about). Their content comes
+// from bookMetadata.ts at render time, not from the page config, so the config
+// is just a placeholder marking where the page sits in the book.
+export interface TitlePageConfig {
+  type: 'title';
+  answerKeyUrl?: string;
+}
+
+export interface CopyrightPageConfig {
+  type: 'copyright';
+  answerKeyUrl?: string;
+}
+
+export interface AboutPageConfig {
+  type: 'about';
+  answerKeyUrl?: string;
+}
+
+export type PageConfiguration = ListPageConfig | TextPageConfig | CustomPageConfig | MatchupPageConfig | TeamsPageConfig | BracketPageConfig | TocPageConfig | TitlePageConfig | CopyrightPageConfig | AboutPageConfig;
 
 export interface PageConfig {
   pages: PageConfiguration[];

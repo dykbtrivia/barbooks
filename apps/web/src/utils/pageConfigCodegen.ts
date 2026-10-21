@@ -87,6 +87,9 @@ export function serializePage(page: PageConfig): string {
     lines.push(`  type: 'toc',`);
     lines.push(`  title: ${JSON.stringify(page.title)},`);
     lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)}`);
+  } else if (page.type === 'title' || page.type === 'copyright' || page.type === 'about') {
+    lines.push(`  type: '${page.type}',`);
+    lines.push(`  answerKeyUrl: ${JSON.stringify(page.answerKeyUrl)}`);
   } else if (page.type === 'teams') {
     lines.push(`  type: 'teams',`);
     lines.push(`  title: ${JSON.stringify(page.title)},`);

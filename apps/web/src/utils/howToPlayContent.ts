@@ -2,10 +2,10 @@
  * howToPlayContent.ts
  *
  * The "How to Play" front-matter page is the same for every book, so it's
- * synthesized in code (see excelToJson.ts) rather than authored as a row in
+ * synthesized in code (see buildBookPages.ts) rather than authored as a row in
  * each book's Excel file. reorderPages() (pageOrder.ts) pins it directly
- * after the toc page(s), so it always lands as page 2 (or page 1, for a
- * book that doesn't have a toc page yet).
+ * after the title/copyright/toc pages, so it always lands as page 4 (or 3,
+ * for a book that doesn't have a toc page yet).
  */
 
 export const HOW_TO_PLAY_HTML = [

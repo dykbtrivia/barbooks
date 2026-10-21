@@ -16,6 +16,10 @@ import Teams from '../components/page-types/Teams.astro';
 import PlayoffBracket from '../components/PlayoffBracket.astro';
 import TableOfContents from '../components/page-types/TableOfContents.astro';
 import TextContent from '../components/page-types/TextContent.astro';
+import TitlePage from '../components/page-types/TitlePage.astro';
+import CopyrightPage from '../components/page-types/CopyrightPage.astro';
+import AboutPage from '../components/page-types/AboutPage.astro';
+import { getBookMetadata } from './bookMetadata.js';
 
 import type {
   BracketPageConfig, CustomPageConfig, ListPageConfig, MatchupPageConfig, PageConfiguration,
@@ -50,6 +54,16 @@ export interface PageTypeRegistryEntry {
 }
 
 const noHeaderProps = (): HeaderProps => ({});
+
+// Front/back matter: content comes from bookMetadata.ts, and KDP wants no
+// page number or running header on these pages, so no PageHeader/PageFooter.
+const bookMatterEntry = (component: any): PageTypeRegistryEntry => ({
+  component,
+  getComponentProps: (_page, ctx) => ({ meta: getBookMetadata(ctx.bookId) }),
+  getHeaderProps: noHeaderProps,
+  showsHeader: false,
+  showsFooter: false,
+});
 
 export const pageTypeRegistry: Record<PageType, PageTypeRegistryEntry> = {
   list: {
@@ -119,4 +133,7 @@ export const pageTypeRegistry: Record<PageType, PageTypeRegistryEntry> = {
     showsHeader: true,
     showsFooter: true,
   },
+  title: bookMatterEntry(TitlePage),
+  copyright: bookMatterEntry(CopyrightPage),
+  about: bookMatterEntry(AboutPage),
 };
