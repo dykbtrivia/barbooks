@@ -18,6 +18,7 @@
 
 import type { PageConfiguration, PageType } from './pageTypes.js';
 import type { TocCategoryEntry } from './tocBuilder.js';
+import { HOW_TO_PLAY_HTML } from './howToPlayContent.js';
 
 export interface SamplePage {
   /** URL slug + gallery anchor: /samples/{id}/ */
@@ -205,15 +206,13 @@ export const samplePages: SamplePage[] = [
     id: 'text',
     type: 'text',
     label: 'Text',
-    note: 'Front-matter prose — paragraph rhythm and measure.',
-    pageNum: 2,
+    note: 'The real "How to Play" copy — the longest text page in the book, so it guards against overflowing the 6x9 page.',
+    pageNum: 4,
     config: {
       type: 'text',
-      title: 'How To Play',
-      content: `<p>Pick a page. Any page. Each one asks you to name a list of things — MVPs, rushing leaders, Super Bowl matchups — and gives you the blanks to fill in.</p>
-<p>Play it solo and see how deep your knowledge really goes, or hand the book to a friend, let them read the questions aloud, and race the clock. There are no single-answer gotchas here: every page is an argument waiting to happen.</p>
-<p>When you're done, scan the QR code at the bottom of the page. The answer key lives online, so it's current — rosters move, records break, and the answers keep up.</p>`,
-      answerKeyUrl: 'https://dykbtrivia.com/answers/nfl/2',
+      title: 'How to Play',
+      content: HOW_TO_PLAY_HTML,
+      answerKeyUrl: 'https://dykbtrivia.com/answers/nfl/4',
     },
   },
   {

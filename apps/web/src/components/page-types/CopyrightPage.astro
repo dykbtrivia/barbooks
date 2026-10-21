@@ -58,9 +58,10 @@ const fullTitle = meta.subtitle ? `${meta.title} ${meta.subtitle}` : meta.title;
 
   @media print {
     .copyright-page {
-      /* 9in page minus body's 0.5in top/bottom print padding (global.css). */
-      height: 8in;
-      min-height: 8in;
+      /* Fill <main> via flex rather than a fixed 8in height — <main> already
+         spans exactly the page minus body padding, and a hard-coded height
+         that rounds even a pixel past it spills onto a second PDF page. */
+      min-height: 0;
     }
   }
 
