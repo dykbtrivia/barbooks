@@ -8,7 +8,7 @@
  *   4. Stitching all page PDFs into one book PDF with pdf-lib
  *
  * Usage:
- *   npx tsx scripts/generate-pdf.ts [--book nfl] [--skip-build] [--out output.pdf]
+ *   npx tsx scripts/generate-pdf.ts [--book nfl] [--skip-build] [--out output.pdf] [--concurrency 6]
  */
 
 import puppeteer from 'puppeteer';
@@ -24,6 +24,12 @@ const skipBuild = args.includes('--skip-build');
 const bookFilter = args.includes('--book') ? args[args.indexOf('--book') + 1] : null;
 const outFlagIdx = args.indexOf('--out');
 const outFlag = outFlagIdx !== -1 ? args[outFlagIdx + 1] : null;
+const concurrencyIdx = args.indexOf('--concurrency');
+const concurrency = concurrencyIdx !== -1 ? Number(args[concurrencyIdx + 1]) : 6;
+if (!Number.isInteger(concurrency) || concurrency < 1) {
+  console.error('--concurrency must be a positive integer');
+  process.exit(1);
+}
 
 const PREVIEW_PORT = 4322;
 const BASE_URL = `http://localhost:${PREVIEW_PORT}`;
@@ -91,6 +97,9 @@ async function main() {
 
   // 4. Determine which books to process
   const bookIds = bookFilter ? [bookFilter] : Object.keys(booksConfig);
+  if (outFlag && bookIds.length > 1) {
+    throw new Error('--out can only be used with a single book; pass --book <id>.');
+  }
 
   // 5. Launch browser (puppeteer ships its own Chrome, installed by `npm install`)
   //
@@ -103,10 +112,10 @@ async function main() {
     protocolTimeout: 300_000,
   });
 
-  // One tab is reused for every page of every book. Opening and closing a tab
-  // per page costs two extra CDP round-trips each and has proven flaky over a
-  // 193-page run; page.goto() fully replaces the document anyway.
-  const page = await browser.newPage();
+  // A fixed pool of tabs is reused for every page of every book. Opening and
+  // closing a tab per page costs two extra CDP round-trips each and has proven
+  // flaky over a 193-page run; page.goto() fully replaces the document anyway.
+  const pages = await Promise.all(Array.from({ length: concurrency }, () => browser.newPage()));
 
   try {
     for (const bookId of bookIds) {
@@ -119,26 +128,34 @@ async function main() {
       const configuredPageCount = bookConfig.pages.length;
       log(`\nGenerating PDF for book: ${bookId} (${configuredPageCount} pages)`);
 
-      const pagePdfs: Buffer[] = [];
+      // Indexed by pageNum - 1 so the merge order is correct no matter which
+      // worker finishes first.
+      const pagePdfs: Buffer[] = new Array(configuredPageCount);
+      let nextPage = 1;
 
-      for (let pageNum = 1; pageNum <= configuredPageCount; pageNum++) {
+      await Promise.all(
+        pages.map(async page => {
+          while (nextPage <= configuredPageCount) {
+            const pageNum = nextPage++;
+            const url = `${BASE_URL}/${bookId}/${pageNum}/`;
+            log(`  Page ${pageNum}: ${url}`);
 
-        const url = `${BASE_URL}/${bookId}/${pageNum}/`;
-        log(`  Page ${pageNum}: ${url}`);
+            await page.goto(url, { waitUntil: 'load' });
+            // The print-footer QR is an inline SVG baked in at build time, so
+            // fonts are the only async thing print output can still be waiting on.
+            await page.evaluate(() => document.fonts.ready);
 
-        await page.goto(url, { waitUntil: 'networkidle0' });
-        // Wait for QR codes to render
-        await sleep(500);
+            const pdfBytes = await page.pdf({
+              width: '6in',
+              height: '9in',
+              printBackground: true,
+              margin: { top: '0', right: '0', bottom: '0', left: '0' },
+            });
 
-        const pdfBytes = await page.pdf({
-          width: '6in',
-          height: '9in',
-          printBackground: true,
-          margin: { top: '0', right: '0', bottom: '0', left: '0' },
-        });
-
-        pagePdfs.push(Buffer.from(pdfBytes));
-      }
+            pagePdfs[pageNum - 1] = Buffer.from(pdfBytes);
+          }
+        }),
+      );
 
       // 6. Merge page PDFs into one book PDF
       log(`\nMerging ${pagePdfs.length} pages for "${bookId}"…`);

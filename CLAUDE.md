@@ -338,7 +338,8 @@ None beyond `npm install` — puppeteer's install hook downloads its own Chrome 
 |------|-------------|
 | `--book <id>` | Generate only one book (e.g. `--book nfl`). Omit to generate all books. |
 | `--skip-build` | Skip `astro build` (use when `dist/` is already up to date). |
-| `--out <path>` | Custom output path for the merged PDF. |
+| `--out <path>` | Custom output path for the merged PDF. Requires `--book` (errors if more than one book would be written). |
+| `--concurrency <n>` | Number of browser tabs printing pages in parallel (default 6). |
 
 ### Examples
 
