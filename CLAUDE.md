@@ -331,7 +331,7 @@ The script at `scripts/generate-pdf.ts` produces a single print-ready PDF per bo
 
 1. Building the Astro site (skippable with `--skip-build`)
 2. Starting a local `astro preview` server on port 4322
-3. Using **Puppeteer** (Chromium) to navigate each page URL and call `page.pdf()` — output dimensions are 6×9 in (KDP trim size)
+3. Using **Puppeteer** (Chromium) to navigate each page URL and call `page.pdf()` — output dimensions are 6×9 in (KDP trim size). Pages print in parallel across a fixed pool of tabs (`--concurrency`, default 6); each page waits only for `load` + `document.fonts.ready` (the print-footer QR is inlined at build time, so there's nothing else to wait on). Results are indexed by page number, so order is unaffected by which tab finishes first. The full NFL book prints in ~10s.
 4. Stitching all per-page PDFs into one document with **pdf-lib**
 5. Writing `{bookId}-book.pdf` (or a custom path) to the project root
 
@@ -345,7 +345,8 @@ None beyond `npm install` — puppeteer's install hook downloads its own Chrome 
 |------|-------------|
 | `--book <id>` | Generate only one book (e.g. `--book nfl`). Omit to generate all books. |
 | `--skip-build` | Skip `astro build` (use when `dist/` is already up to date). |
-| `--out <path>` | Custom output path for the merged PDF. |
+| `--out <path>` | Custom output path for the merged PDF. Requires `--book` — with multiple books it errors instead of overwriting one file with each book. |
+| `--concurrency <n>` | Number of tabs printing in parallel (default 6). |
 
 ### Examples
 
