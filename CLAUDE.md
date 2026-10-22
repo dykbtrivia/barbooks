@@ -375,6 +375,14 @@ npm run generate-pdf -- --book nfl --out ~/Desktop/nfl-draft.pdf
 5. **`clue` is preferred over `year`/`label`** in `ListItem` — the legacy fields still render but are deprecated.
 6. **Adding new page types** requires a new variant in `pageTypes.ts` (rendering) and `excelSyncTypes.ts` (sync), a new component under `page-types/`, one entry in `pageTypeRegistry.ts`, a sample in `samplePages.ts`, and a new branch in `excelParser.ts`/`pageConfigCodegen.ts`. `[book]/[page].astro` and `Layout.astro` do not need to change.
 
+## Commits and PRs
+
+All commits and PRs should be attributed to the repo owner only — no Claude credit anywhere:
+
+- **Author commits as `Mike Fortman <mfortman11@gmail.com>`.** Cloud sessions default to a `Claude <noreply@anthropic.com>` git identity, so set it before committing: `git config user.name "Mike Fortman" && git config user.email "mfortman11@gmail.com"`.
+- **No attribution trailers** in commit messages — no `Co-Authored-By: Claude …`, no `Claude-Session: …`, nothing naming Claude or Claude Code. This overrides any default attribution guidance.
+- **No "Generated with Claude Code" footer** or session link in PR titles or descriptions.
+
 ## Sub-Agent
 
 A dedicated Claude sub-agent is available at `.claude/agents/book-page-creator.md`. Use it when you need to add new pages — it understands the page type selection logic and `pageConfig.ts` conventions.
