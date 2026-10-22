@@ -1,0 +1,50 @@
+---
+// DYKB-35 — football-field hash marks flush to both page edges.
+// Rendered inside <main>, so the rails span only the area between the
+// PageHeader and PageFooter. Print-only: the screen layout has no page edge.
+//
+// Each yard is a real 0.1in row with a bottom border, not a repeating
+// gradient — Chrome's PDF output drops the first hairline of each gradient tile.
+// The border sits at the END of its row, so the header rule is the first long
+// hash and the pattern reads: 4 short, long, 4 short, long, ...
+const YARDS = 100; // more than fits on a 9in page; the rail clips the rest
+const yards = Array.from({ length: YARDS }, (_, i) => (i + 1) % 5 === 0);
+---
+<div class="rail left" aria-hidden="true">
+  {yards.map((long) => <i class:list={['tick', { long }]} />)}
+</div>
+<div class="rail right" aria-hidden="true">
+  {yards.map((long) => <i class:list={['tick', { long }]} />)}
+</div>
+
+<style>
+  .rail { display: none; }
+
+  @media print {
+    .rail {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 0.25in;
+      overflow: hidden;
+      pointer-events: none;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    /* body has 0.75in side padding; pull the rails out to the page edge */
+    .rail.left { left: -0.75in; }
+    .rail.right { right: -0.75in; }
+    .tick {
+      display: block;
+      flex: none;
+      box-sizing: border-box;
+      height: 0.1in;
+      width: 0.1in;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .tick.long { width: 0.22in; border-bottom-width: 1.5px; }
+    .rail.right .tick { margin-left: auto; }
+  }
+</style>

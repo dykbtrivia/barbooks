@@ -34,3 +34,7 @@ apps/web/public/samples-pdf/
 .agents/
 .claude/skills/*
 !.claude/skills/bracket-row
+
+# generated book PDFs (npm run generate-pdf)
+nba-book.pdf
+nfl-book.pdf
