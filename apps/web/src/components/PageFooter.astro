@@ -21,13 +21,13 @@ const isOdd = side === 'right';
 <div class="print-footer">
   <div class="footer-stripe">
     <div class="page-num-slot">
-      {isOdd ? <span class="page-num">{currentPage}</span> : <span class="answer-key-label">Scan for Answer Key</span>}
+      {isOdd ? <span class="page-num">{currentPage}</span> : qrSvg && <span class="answer-key-label">Scan for Answer Key</span>}
     </div>
     <div class="qr-container">
       {qrSvg && <Fragment set:html={qrSvg} />}
     </div>
     <div class="page-num-slot right">
-      {!isOdd ? <span class="page-num">{currentPage}</span> : <span class="answer-key-label">Scan for Answer Key</span>}
+      {!isOdd ? <span class="page-num">{currentPage}</span> : qrSvg && <span class="answer-key-label">Scan for Answer Key</span>}
     </div>
   </div>
 </div>

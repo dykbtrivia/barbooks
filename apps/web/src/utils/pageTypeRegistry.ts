@@ -51,6 +51,10 @@ export interface PageTypeRegistryEntry {
   getHeaderProps: (page: PageConfiguration) => HeaderProps;
   showsHeader: boolean;
   showsFooter: boolean;
+  // Whether the footer carries the answer-key QR (and its label). Defaults to
+  // true; text/custom pages have no answers to scan for, so they opt out and
+  // keep just the page number.
+  hasAnswerKey?: boolean;
 }
 
 const noHeaderProps = (): HeaderProps => ({});
@@ -125,6 +129,7 @@ export const pageTypeRegistry: Record<PageType, PageTypeRegistryEntry> = {
     getHeaderProps: (page) => ({ title: (page as TextPageConfig).title }),
     showsHeader: true,
     showsFooter: true,
+    hasAnswerKey: false,
   },
   custom: {
     component: TextContent,
@@ -132,6 +137,7 @@ export const pageTypeRegistry: Record<PageType, PageTypeRegistryEntry> = {
     getHeaderProps: noHeaderProps,
     showsHeader: true,
     showsFooter: true,
+    hasAnswerKey: false,
   },
   title: bookMatterEntry(TitlePage),
   copyright: bookMatterEntry(CopyrightPage),

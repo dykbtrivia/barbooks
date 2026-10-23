@@ -39,6 +39,7 @@ interface Props {
   // that don't pass it (e.g. 404.astro) keep getting both, as before.
   showsHeader?: boolean;
   showsFooter?: boolean;
+  hasAnswerKey?: boolean;
   // Site nav chrome (SiteHeader/SiteFooter/TocSidePanel). The /samples gallery
   // turns it off so each sample tile shows only the book page itself.
   showSiteChrome?: boolean;
@@ -48,7 +49,7 @@ const {
   title, currentPage = 1, answerKeyUrl, bookId = 'nfl', pageTitle, pageDescription,
   category, difficulty, actionContent, itemCount, pageType,
   tocEntries: tocEntriesProp, pagesSummary: pagesSummaryProp, totalPages: totalPagesProp,
-  showsHeader = true, showsFooter = true, showSiteChrome = true,
+  showsHeader = true, showsFooter = true, hasAnswerKey = true, showSiteChrome = true,
 } = Astro.props as Props;
 
 const book = booksConfig[bookId];
@@ -80,7 +81,7 @@ const tocEntries = tocEntriesProp ?? (book ? buildToc(book.pages) : []);
     </main>
     {showSiteChrome && <SiteFooter currentPage={currentPage} totalPages={totalPages} />}
     {showsFooter && (
-      <PageFooter currentPage={currentPage} answerKeyUrl={answerKeyUrl} />
+      <PageFooter currentPage={currentPage} answerKeyUrl={hasAnswerKey ? answerKeyUrl : undefined} />
     )}
   </div>
   {showSiteChrome && <TocSidePanel entries={tocEntries} bookId={bookId} currentPage={currentPage} />}
