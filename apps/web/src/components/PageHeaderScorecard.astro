@@ -1,5 +1,6 @@
 ---
 import type { ActionContent as ActionContentType, PageDifficulty, PageType } from '../utils/pageTypes.js';
+import { TITLE_MAX_CHARS } from '../utils/headerLint.js';
 
 interface Props {
   title?: string;
@@ -17,6 +18,9 @@ interface Props {
 const { title = "Book Page", currentPage = 1, pageTitle, pageDescription, category, difficulty } = Astro.props as Props;
 
 const displayTitle = pageTitle || title;
+// Fallback for titles sync-pages already warned about: print them smaller so
+// the header never grows past two lines.
+const isLongTitle = displayTitle.length > TITLE_MAX_CHARS;
 const difficultyLevel = difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 2 : difficulty === 'Hard' ? 3 : 0;
 const hasMetaGrid = category || difficulty;
 ---
@@ -49,7 +53,7 @@ const hasMetaGrid = category || difficulty;
       )}
     </div>
     <div class="question-block">
-      <div class="question-title">{displayTitle}</div>
+      <div class:list={['question-title', { 'question-title--long': isLongTitle }]}>{displayTitle}</div>
       {pageDescription && (
         <div class="instructions">{pageDescription}</div>
       )}
@@ -143,6 +147,10 @@ const hasMetaGrid = category || difficulty;
     color: #1a1a1a;
     line-height: 0.95;
     margin-bottom: 6px;
+  }
+
+  .question-title--long {
+    font-size: 26px;
   }
 
   .instructions {

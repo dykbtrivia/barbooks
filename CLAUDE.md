@@ -116,7 +116,7 @@ barbooks/
 │   │       │   └── PageFooter.astro     # Print-only footer with QR code
 │   │       ├── layouts/Layout.astro     # Root HTML template
 │   │       ├── pages/
-│   │       │   ├── index.astro          # Redirects to /barbooks/nfl/1/
+│   │       │   ├── index.astro          # Redirects to /nfl/1/
 │   │       │   ├── [book]/[page].astro  # Dynamic route: generates pages for all books
 │   │       │   ├── samples/index.astro     # Dev gallery: every page type at once
 │   │       │   ├── samples/[sample].astro  # One sample page, real render path
@@ -182,6 +182,10 @@ The sync pipeline is split across four files, each with one job:
 - `"25 items – clues are years descending from 2024"` → auto-generates year array
 - `"20 items – clues are rank numbers"` → generates `#1`, `#2`, …
 - Any other pattern → items with empty clues (warns at generation time)
+
+**Header checks** (`headerLint.ts`, run by `sync-pages`) warn on each question page whose:
+- **title is longer than 55 characters** (`TITLE_MAX_CHARS`). That's the most that fits two header lines at full size. `PageHeaderScorecard` prints longer titles smaller as a fallback, but shorten them in Excel.
+- **description just restates the title.** A description should only add what the title doesn't say, such as `Since 1966.` or `Full PPR scoring.`, or be left blank.
 
 **Matchup Items sheet** (columns A–D):
 | Column | Field | Notes |
@@ -254,7 +258,7 @@ interface ActionContent {
 
 - `src/pages/[book]/[page].astro` pre-renders every page of every book at build time via `getStaticPaths()`, driven by `booksConfig`
 - Invalid page numbers redirect to page 1
-- URL pattern: `/barbooks/{book}/{pageNum}/`
+- URL pattern: `/{book}/{pageNum}/`
 - `pageConfig.getPageConfiguration(n)` returns the configured page or a fallback `text` page for unconfigured numbers
 - `[book]/[page].astro` itself does no per-type branching: it looks up `pageTypeRegistry[pageType]` to get the renderer component, its props, and header props, then passes `tocEntries`/`pagesSummary`/`totalPages` (computed once here) down into `Layout.astro` so it doesn't recompute them. `Layout.astro` still derives them itself as a fallback for callers that don't pass them (e.g. `404.astro`).
 
@@ -317,13 +321,11 @@ GitHub Actions workflow (`.github/workflows/deploy.yml`):
 2. Configure GitHub Pages base URL
 3. `npm run build` → Upload `dist/` artifact → Deploy to Pages
 
-GitHub Pages configuration (in `astro.config.mjs`):
-- `site: 'https://mfortman11.github.io'`
-- `base: '/barbooks'`
+Site configuration (in `astro.config.mjs`):
+- `site: 'https://dykbtrivia.com'`
+- no `base` — pages are served from the root (`/nfl/1/`, `/samples/`)
 - `output: 'static'`
 - `assetsInlineLimit: 0` (required for GitHub Pages asset resolution)
-
-All internal links must account for the `/barbooks` base path. Astro handles this automatically when using its built-in routing and asset helpers.
 
 ## PDF Generation
 

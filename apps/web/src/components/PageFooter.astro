@@ -59,8 +59,10 @@ const isOdd = side === 'right';
       -webkit-print-color-adjust: exact;
     }
 
+    /* Equal-width side slots keep the QR centered; wide enough for the
+       answer-key label on one line. */
     .page-num-slot {
-      width: 40px;
+      flex: 1;
       display: flex;
       align-items: center;
     }
@@ -90,6 +92,7 @@ const isOdd = side === 'right';
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: #999;
+      white-space: nowrap;
     }
   }
 </style>
