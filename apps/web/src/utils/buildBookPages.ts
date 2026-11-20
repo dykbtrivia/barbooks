@@ -18,6 +18,7 @@ import XLSX from 'xlsx';
 import { parseBookPages } from './excelParser.js';
 import { reorderPages } from './pageOrder.js';
 import { HOW_TO_PLAY_HTML } from './howToPlayContent.js';
+import { assertLinksUnchanged } from './answerLinks.js';
 import type { PageConfig } from './excelSyncTypes.js';
 
 export interface BookSource {
@@ -87,6 +88,10 @@ export function buildOrderedPages(book: BookSource): BuiltBook | null {
   ];
 
   const ordered = reorderPages([...bookMatter, ...pages], book.id);
+
+  // Printed QR codes depend on page numbers — fail loudly rather than let a
+  // frozen (published) link version's numbering shift. See answerLinks.ts.
+  assertLinksUnchanged(book.id, ordered);
 
   return { pages: ordered, warnings };
 }

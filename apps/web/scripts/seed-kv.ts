@@ -7,6 +7,11 @@
  * the printed page numbers readers actually scan, not the Excel sheet's raw
  * `pageNum` column.
  *
+ * Keys are `{book}:{linkVersion}:{page}` (see src/utils/answerLinks.ts).
+ * `wrangler kv bulk put` only adds or overwrites keys, never deletes, so
+ * pushing the current version leaves every older version's entries — and the
+ * printed copies that use them — working.
+ *
  * Usage:
  *   npx tsx scripts/seed-kv.ts
  *   npx wrangler kv bulk put --namespace-id <id> kv-seed.json
@@ -18,6 +23,7 @@ import { fileURLToPath } from 'url';
 
 import { BOOKS } from '../src/utils/excelSheetHeaders.js';
 import { buildOrderedPages } from '../src/utils/buildBookPages.js';
+import { answerKvKey } from '../src/utils/answerLinks.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,7 +49,7 @@ for (const book of BOOKS) {
     const category = ('category' in page && page.category) ? page.category : 'General';
 
     entries.push({
-      key: `${book.id}:${finalPageNum}`,
+      key: answerKvKey(book.id, finalPageNum),
       value: JSON.stringify({ url: realUrl, label: title, category }),
     });
     count++;

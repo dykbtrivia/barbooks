@@ -20,9 +20,18 @@ Question pages do **not** include printed answers. Each page has an `answerKeyUr
 
 ### Answer key redirect flow
 
-QR codes in the book point to **`https://dykbtrivia.com/answers/{book}/{pageNum}`** (e.g., `dykbtrivia.com/answers/nfl/1`). A Cloudflare Worker, scoped to just the `/answers/*` path on that domain (see `apps/worker/wrangler.toml`'s `routes`), looks up the page number in KV and redirects to the real answer key URL (e.g., a pro-football-reference page). Everything else on `dykbtrivia.com` — the marketing site, the book reader — is served by the actual site, not this worker, since the `/answers/` prefix keeps the two from ever colliding on the same URL.
+QR codes in the book point to **`https://dykbtrivia.com/answers/{book}/{linkVersion}/{pageNum}`** (e.g., `dykbtrivia.com/answers/nfl/1/57`). A Cloudflare Worker, scoped to just the `/answers/*` path on that domain (see `apps/worker/wrangler.toml`'s `routes`), looks up the KV key `{book}:{linkVersion}:{pageNum}` and redirects to the real answer key URL (e.g., a pro-football-reference page). Everything else on `dykbtrivia.com` — the marketing site, the book reader — is served by the actual site, not this worker, since the `/answers/` prefix keeps the two from ever colliding on the same URL. The older unversioned forms (`/answers/nfl/57`, `/answers/57`) still resolve, as version 1.
 
-**The Excel `answerKeyUrl` column stores the real destination URLs for human reference only.** The sync script (`excelToJson.ts`) does **not** copy these URLs into `pageConfig.ts` — instead it generates redirect URLs (`https://dykbtrivia.com/answers/{book}/{pageNum}`) so the QR codes always go through the worker.
+**The Excel `answerKeyUrl` column stores the real destination URLs for human reference only.** The sync script (`excelToJson.ts`) does **not** copy these URLs into `pageConfig.ts` — instead it generates redirect URLs so the QR codes always go through the worker. URL and KV-key building live in `apps/web/src/utils/answerLinks.ts`.
+
+#### Link versions (printed copies can't be updated)
+
+KDP prints on demand from the latest upload, so a fix is just a re-upload — but copies already sold keep their QR codes forever. So:
+
+- **`linkVersion`** (per book, in `bookMetadata.ts`) is part of every QR code. **Bump it only when a new printing changes page numbers** (a page removed or added mid-book). Re-run `npm run sync-pages` after bumping — it's baked into `pageConfig.ts`.
+- **Fixing where an answer link goes needs no new version** — update that `{book}:{linkVersion}:{pageNum}` entry in KV (via the worker's admin endpoint or `wrangler kv`). The same question appears under each version it was printed in, so fix every version's key.
+- **When a version is published**, freeze it: `npm run freeze-links -- --book nfl` writes `apps/web/answer-links/{book}-v{n}.json` (commit it), then tag it: `git tag nfl-v1`. From then on `sync-pages` and `seed-kv` **fail** if that version's page → question mapping changes, naming the moved pages. For a title-only fix on an unchanged page, re-freeze with `--force`.
+- `wrangler kv bulk put` never deletes keys, so seeding the current version leaves older versions' entries (and their printed copies) working.
 
 To populate/update the worker's KV store with the real URLs from Excel, run:
 ```sh
@@ -101,6 +110,8 @@ barbooks/
 │   │   ├── scripts/generate-pdf.ts      # PDF generation script (Puppeteer + pdf-lib)
 │   │   ├── scripts/generate-samples-pdf.ts  # Prints each /samples page to PDF + PNG
 │   │   ├── scripts/seed-kv.ts           # Seeds the Worker's KV store from Excel
+│   │   ├── scripts/freeze-links.ts      # Freezes a published version's page → question mapping
+│   │   ├── answer-links/                # Frozen {book}-v{n}.json per published link version
 │   │   ├── public/favicon.svg
 │   │   ├── NFL Barbook Trivia.xlsx      # NFL source of truth
 │   │   ├── NBA Barbook Trivia.xlsx      # NBA source of truth
@@ -133,7 +144,8 @@ barbooks/
 │   │           ├── pageOrder.ts         # Category/subcategory ordering + final answerKeyUrl assignment
 │   │           ├── pageConfigCodegen.ts # PageConfig[] → pageConfig.ts source text
 │   │           ├── samplePages.ts       # Fixtures for the /samples gallery (one per page type)
-│   │           ├── bookMetadata.ts      # Per-book KDP metadata (title/author/ISBN/©) for title/copyright/about pages
+│   │           ├── bookMetadata.ts      # Per-book KDP metadata (title/author/ISBN/©, linkVersion) for front/back matter + QR links
+│   │           ├── answerLinks.ts       # QR answer URL + KV key building, frozen-version check
 │   │           ├── tocBuilder.ts        # Builds TOC entries from ordered pages
 │   │           └── pagesSummary.ts      # Builds the page list used by SiteHeader's page picker
 │   └── worker/

@@ -11,6 +11,7 @@
     "astro": "astro",
     "sync-pages": "npx tsx src/utils/excelToJson.ts",
     "seed-kv": "npx tsx scripts/seed-kv.ts",
+    "freeze-links": "npx tsx scripts/freeze-links.ts",
     "generate-pdf": "npx tsx scripts/generate-pdf.ts",
     "samples-pdf": "npx tsx scripts/generate-samples-pdf.ts",
     "og-image": "npx tsx scripts/generate-og-image.ts"
