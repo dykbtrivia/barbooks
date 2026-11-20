@@ -17,6 +17,7 @@ import * as path from 'path';
 import { buildOrderedPages } from './buildBookPages.js';
 import { generatePageConfigSource } from './pageConfigCodegen.js';
 import { BOOKS } from './excelSheetHeaders.js';
+import { lintPageHeaders } from './headerLint.js';
 import type { PageConfig } from './excelSyncTypes.js';
 
 const OUT_PATH = path.join('src', 'utils', 'pageConfig.ts');
@@ -28,7 +29,7 @@ for (const book of BOOKS) {
   const built = buildOrderedPages(book);
   if (!built) continue;
 
-  totalWarnings += built.warnings;
+  totalWarnings += built.warnings + lintPageHeaders(built.pages, book.id);
   bookResults.push({ id: book.id, pages: built.pages });
   console.log(`✅  Generated ${built.pages.length} pages for [${book.id}]`);
 }
