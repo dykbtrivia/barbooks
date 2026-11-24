@@ -12,6 +12,7 @@
  */
 
 import type { PageConfig } from './excelSyncTypes.js';
+import { answerKeyUrl, QUESTION_TYPES } from './answerLinks.js';
 
 // Controls the order categories/subcategories are sorted into during sync —
 // edit these lists to change how the book (and its TOC) is organized.
@@ -33,7 +34,7 @@ export const SUBCATEGORY_ORDER: string[] = [
   'Matchups',
 ];
 
-const CONTENT_TYPES = new Set(['list', 'matchup', 'teams', 'bracket']);
+const CONTENT_TYPES = QUESTION_TYPES;
 
 // KDP layout: the title page must be right-facing (odd) with the copyright
 // page on its back, so these lead the book in exactly this order.
@@ -123,6 +124,6 @@ export function reorderPages(pages: PageConfig[], bookId: string): PageConfig[] 
 
   return ordered.map((page, i) => ({
     ...page,
-    answerKeyUrl: `https://dykbtrivia.com/answers/${bookId}/${i + 1}`,
+    answerKeyUrl: answerKeyUrl(bookId, i + 1),
   })) as PageConfig[];
 }
